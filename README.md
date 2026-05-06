@@ -2,6 +2,8 @@
 
 Just a todo widget app.
 
+![App preview](/docs/app_preview.png)
+
 ## Installation
 
 1. Install dependencies:
