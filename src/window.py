@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QPushButton,
 )
-from PyQt5.QtCore import Qt, QEvent
+from PyQt5.QtCore import Qt, QEvent, QSettings
 from PyQt5.QtGui import QFont
 from typing import List, Optional
 from src.task import Task
@@ -78,6 +78,7 @@ class Window(QMainWindow):
         self.mouse_press_y: int = 0
         self.is_maximized: bool = False
         self.normal_geometry = self.geometry()
+        self.restore_geometry()
 
     def _init_window(self) -> None:
         self.setWindowTitle(WINDOW_TITLE)
@@ -87,17 +88,17 @@ class Window(QMainWindow):
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
-        
+
         top_layout = QVBoxLayout()
         top_layout.setContentsMargins(0, 0, 0, 0)
         top_layout.setSpacing(0)
-        
+
         self.main_layout = QVBoxLayout()
         self.main_layout.setContentsMargins(
             WINDOW_MARGIN, WINDOW_MARGIN, WINDOW_MARGIN, WINDOW_MARGIN
         )
         self.main_layout.setSpacing(WINDOW_SPACING)
-        
+
         top_layout.addLayout(self._create_title_bar())
         top_layout.addLayout(self.main_layout)
         central_widget.setLayout(top_layout)
@@ -109,11 +110,13 @@ class Window(QMainWindow):
         )
         title_bar_layout = QHBoxLayout()
         title_bar_layout.setContentsMargins(
-            TITLE_BAR_MARGIN_LEFT, TITLE_BAR_MARGIN_TOP, 
-            TITLE_BAR_MARGIN_RIGHT, TITLE_BAR_MARGIN_BOTTOM
+            TITLE_BAR_MARGIN_LEFT,
+            TITLE_BAR_MARGIN_TOP,
+            TITLE_BAR_MARGIN_RIGHT,
+            TITLE_BAR_MARGIN_BOTTOM,
         )
         title_bar_layout.setSpacing(TITLE_BAR_SPACING)
-        
+
         title = QPushButton(TITLE_TEXT)
         title.setFont(
             QFont(self.style.title_font_name, self.style.title_font_size, QFont.Bold)
@@ -124,9 +127,9 @@ class Window(QMainWindow):
         )
         title.setEnabled(False)
         title_bar_layout.addWidget(title)
-        
+
         title_bar_layout.addStretch()
-        
+
         minimize_btn = QPushButton(MINIMIZE_BUTTON_TEXT)
         minimize_btn.setMaximumWidth(CONTROL_BUTTON_SIZE)
         minimize_btn.setStyleSheet(
@@ -137,7 +140,7 @@ class Window(QMainWindow):
         )
         minimize_btn.clicked.connect(self.minimize_window)
         title_bar_layout.addWidget(minimize_btn)
-        
+
         self.maximize_btn = QPushButton(MAXIMIZE_BUTTON_TEXT)
         self.maximize_btn.setMaximumWidth(CONTROL_BUTTON_SIZE)
         self.maximize_btn.setStyleSheet(
@@ -148,7 +151,7 @@ class Window(QMainWindow):
         )
         self.maximize_btn.clicked.connect(self.toggle_maximize)
         title_bar_layout.addWidget(self.maximize_btn)
-        
+
         close_btn = QPushButton(CLOSE_BUTTON_TEXT)
         close_btn.setMaximumWidth(CONTROL_BUTTON_SIZE)
         close_btn.setStyleSheet(
@@ -159,9 +162,9 @@ class Window(QMainWindow):
         )
         close_btn.clicked.connect(self.close_window)
         title_bar_layout.addWidget(close_btn)
-        
+
         title_bar_widget.setLayout(title_bar_layout)
-        
+
         title_bar_container = QHBoxLayout()
         title_bar_container.setContentsMargins(0, 0, 0, 0)
         title_bar_container.addWidget(title_bar_widget)
@@ -303,3 +306,21 @@ class Window(QMainWindow):
 
     def display(self) -> None:
         self.show()
+
+    def restore_geometry(self) -> None:
+        """Restore window geometry from settings."""
+        settings = QSettings("JustTodoIt", "JustTodoIt")
+        geometry = settings.value("geometry", b"")
+        window_state = settings.value("windowState", b"")
+
+        if geometry:
+            self.restoreGeometry(geometry)
+        if window_state:
+            self.restoreState(window_state)
+
+    def closeEvent(self, event) -> None:
+        """Save window geometry before closing."""
+        settings = QSettings("JustTodoIt", "JustTodoIt")
+        settings.setValue("geometry", self.saveGeometry())
+        settings.setValue("windowState", self.saveState())
+        event.accept()
