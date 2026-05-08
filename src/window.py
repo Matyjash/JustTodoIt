@@ -54,16 +54,17 @@ CLOSE_BUTTON_PRESSED_ALPHA = 0.5
 class Window(QMainWindow):
     """Main window for the todo application."""
 
-    def __init__(self, tasks: List[Task], style: Style = DEFAULT_STYLE):
+    def __init__(self, task_file_storage, style: Style = DEFAULT_STYLE):
         """
         Initialize the Window.
 
         Args:
-            tasks: List of Task objects to display
+            task_file_storage: TaskFileStorage instance for persisting tasks
             style: Style configuration for the window (default: DEFAULT_STYLE)
         """
         super().__init__()
-        self.tasks = tasks
+        self.task_file_storage = task_file_storage
+        self.tasks = task_file_storage.load_tasks()
         self.style = style
         self.init_ui()
 
@@ -252,22 +253,26 @@ class Window(QMainWindow):
         )
         self.todo_list.addItem(item)
         self.input_field.clear()
+        self.task_file_storage.save_tasks(self.tasks)
 
     def delete_todo(self) -> None:
         row = self.todo_list.currentRow()
         if row >= 0:
             self.tasks.pop(row)
             self.todo_list.takeItem(row)
+            self.task_file_storage.save_tasks(self.tasks)
 
     def clear_all(self) -> None:
         self.tasks.clear()
         self.todo_list.clear()
+        self.task_file_storage.save_tasks(self.tasks)
 
     def mouseDoubleClickItem(self, item: QListWidgetItem) -> None:
         task = item.data(Qt.UserRole)
         if task:
             task.toggle()
             item.setText(str(task))
+            self.task_file_storage.save_tasks(self.tasks)
 
     def mousePressEvent(self, event: QEvent) -> None:
         if event.button() == Qt.LeftButton:
