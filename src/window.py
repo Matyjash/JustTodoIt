@@ -7,12 +7,14 @@ from PyQt5.QtWidgets import (
     QListWidgetItem,
     QLineEdit,
     QPushButton,
+    QDialog,
 )
 from PyQt5.QtCore import Qt, QEvent, QSettings
 from PyQt5.QtGui import QFont
 from typing import List, Optional
 from src.task import Task
 from src.style import Style, DEFAULT_STYLE
+from src.edit_task_window import EditTaskWindow
 
 WINDOW_TITLE = "Todo App"
 WINDOW_X = 100
@@ -228,14 +230,39 @@ class Window(QMainWindow):
 
     def load_tasks(self) -> None:
         self.todo_list.clear()
-        for task in self.tasks:
+        for index, task in enumerate(self.tasks):
             item = QListWidgetItem()
-            item.setText(str(task))
             item.setData(Qt.UserRole, task)
             item.setFont(
                 QFont(self.style.list_item_font_name, self.style.list_item_font_size)
             )
             self.todo_list.addItem(item)
+
+            item_widget = QWidget()
+            item_widget.setStyleSheet(f"background-color: {self.style.list_bg_color};")
+            item_layout = QHBoxLayout()
+            item_layout.setContentsMargins(0, 0, 0, 0)
+            item_layout.setSpacing(5)
+
+            task_label = QPushButton(str(task))
+            task_label.setStyleSheet(
+                f"QPushButton {{ background-color: transparent; color: black; border: none; text-align: left; padding: 0px; }}"
+            )
+            task_label.setEnabled(False)
+            item_layout.addWidget(task_label)
+
+            edit_button = QPushButton("E")
+            edit_button.setMaximumWidth(30)
+            edit_button.setStyleSheet(
+                f"QPushButton {{ background-color: {self.style.edit_btn_bg_color}; color: {self.style.edit_btn_text_color}; "
+                f"padding: {self.style.edit_btn_padding}; border: none; border-radius: 4px; }}"
+                f"QPushButton:hover {{ background-color: {self.style.edit_btn_hover_color}; }}"
+            )
+            edit_button.clicked.connect(lambda checked, idx=index: self.open_edit_dialog(idx))
+            item_layout.addWidget(edit_button)
+
+            item_widget.setLayout(item_layout)
+            self.todo_list.setItemWidget(item, item_widget)
 
     def add_todo(self) -> None:
         text = self.input_field.text().strip()
@@ -261,6 +288,22 @@ class Window(QMainWindow):
             self.tasks.pop(row)
             self.todo_list.takeItem(row)
             self.task_file_storage.save_tasks(self.tasks)
+
+    def open_edit_dialog(self, task_index: int) -> None:
+        if task_index < 0 or task_index >= len(self.tasks):
+            return
+
+        task = self.tasks[task_index]
+        main_geometry = self.frameGeometry()
+        start_reference_position = (main_geometry.x(), main_geometry.y(), main_geometry.width(), main_geometry.height())
+        edit_window = EditTaskWindow(task, self.style, start_reference_position)
+        
+        result = edit_window.exec_()
+
+        if result == QDialog.Accepted and edit_window.new_text:
+            task.text = edit_window.new_text
+            self.task_file_storage.save_tasks(self.tasks)
+            self.load_tasks()
 
     def clear_all(self) -> None:
         self.tasks.clear()

@@ -39,5 +39,15 @@ class Style:
     clear_btn_padding: str = "8px 15px"
     clear_btn_hover_color: str = "#e68900"
 
+    edit_btn_bg_color: str = "#9e9e9e"
+    edit_btn_text_color: str = "white"
+    edit_btn_padding: str = "6px 12px"
+    edit_btn_hover_color: str = "#757575"
+
+    save_btn_bg_color: str = "#4CAF50"
+    save_btn_text_color: str = "white"
+    save_btn_padding: str = "8px 15px"
+    save_btn_hover_color: str = "#45a049"
+
 
 DEFAULT_STYLE = Style()
