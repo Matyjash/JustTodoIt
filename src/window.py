@@ -258,7 +258,9 @@ class Window(QMainWindow):
                 f"padding: {self.style.edit_btn_padding}; border: none; border-radius: 4px; }}"
                 f"QPushButton:hover {{ background-color: {self.style.edit_btn_hover_color}; }}"
             )
-            edit_button.clicked.connect(lambda checked, idx=index: self.open_edit_dialog(idx))
+            edit_button.clicked.connect(
+                lambda checked, idx=index: self.open_edit_dialog(idx)
+            )
             item_layout.addWidget(edit_button)
 
             item_widget.setLayout(item_layout)
@@ -295,9 +297,14 @@ class Window(QMainWindow):
 
         task = self.tasks[task_index]
         main_geometry = self.frameGeometry()
-        start_reference_position = (main_geometry.x(), main_geometry.y(), main_geometry.width(), main_geometry.height())
+        start_reference_position = (
+            main_geometry.x(),
+            main_geometry.y(),
+            main_geometry.width(),
+            main_geometry.height(),
+        )
         edit_window = EditTaskWindow(task, self.style, start_reference_position)
-        
+
         result = edit_window.exec_()
 
         if result == QDialog.Accepted and edit_window.new_text:

@@ -40,7 +40,13 @@ CLOSE_BUTTON_PRESSED_ALPHA = 0.5
 class EditTaskWindow(QDialog):
     """Dialog window for editing a task."""
 
-    def __init__(self, task: Task, style: Style = DEFAULT_STYLE, start_reference_position: Optional[tuple] = None, parent=None):
+    def __init__(
+        self,
+        task: Task,
+        style: Style = DEFAULT_STYLE,
+        start_reference_position: Optional[tuple] = None,
+        parent=None,
+    ):
         """
         Initialize the EditTaskWindow.
 
@@ -59,12 +65,18 @@ class EditTaskWindow(QDialog):
 
     def init_ui(self, start_reference_position: Optional[tuple] = None) -> None:
         self.resize(WINDOW_WIDTH, WINDOW_HEIGHT)
-        
+
         if start_reference_position:
-            x = start_reference_position[0] + (start_reference_position[2] - WINDOW_WIDTH) // 2
-            y = start_reference_position[1] + (start_reference_position[3] - WINDOW_HEIGHT) // 2
+            x = (
+                start_reference_position[0]
+                + (start_reference_position[2] - WINDOW_WIDTH) // 2
+            )
+            y = (
+                start_reference_position[1]
+                + (start_reference_position[3] - WINDOW_HEIGHT) // 2
+            )
             self.move(x, y)
-        
+
         self.setStyleSheet(f"background-color: {self.style.window_background};")
 
         main_layout = QVBoxLayout()
@@ -74,7 +86,9 @@ class EditTaskWindow(QDialog):
         main_layout.addLayout(self._create_title_bar())
 
         content_layout = QVBoxLayout()
-        content_layout.setContentsMargins(CONTENT_MARGIN, CONTENT_MARGIN, CONTENT_MARGIN, CONTENT_MARGIN)
+        content_layout.setContentsMargins(
+            CONTENT_MARGIN, CONTENT_MARGIN, CONTENT_MARGIN, CONTENT_MARGIN
+        )
         content_layout.setSpacing(CONTENT_SPACING)
 
         self.input_field = QLineEdit()
