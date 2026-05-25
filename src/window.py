@@ -9,8 +9,8 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QDialog,
 )
-from PyQt5.QtCore import Qt, QEvent, QSettings
-from PyQt5.QtGui import QFont
+from PyQt5.QtCore import Qt, QEvent, QSettings, QRect
+from PyQt5.QtGui import QFont, QCursor
 from typing import List, Optional
 from src.task import Task
 from src.style import Style, DEFAULT_STYLE
@@ -38,6 +38,7 @@ CLOSE_BUTTON_TEXT = "✕"
 DRAG_THRESHOLD_Y = 50
 TITLE_BAR_HEIGHT = 30
 CONTROL_BUTTON_SIZE = 24
+RESIZE_THRESHOLD = 10
 
 TITLE_BAR_MARGIN_LEFT = 10
 TITLE_BAR_MARGIN_TOP = 5
@@ -81,6 +82,8 @@ class Window(QMainWindow):
         self.mouse_press_y: int = 0
         self.is_maximized: bool = False
         self.normal_geometry = self.geometry()
+        self.is_resizing: bool = False
+        self.resize_direction: str = ""
         self.restore_geometry()
 
     def _init_window(self) -> None:
@@ -324,16 +327,120 @@ class Window(QMainWindow):
             item.setText(str(task))
             self.task_file_storage.save_tasks(self.tasks)
 
+    def _get_resize_direction(self, x: int, y: int) -> str:
+        """Determine which edge/corner the cursor is near."""
+        rect = self.rect()
+        width = rect.width()
+        height = rect.height()
+        threshold = RESIZE_THRESHOLD
+
+        near_left = x < threshold
+        near_right = x > width - threshold
+        near_top = y < threshold
+        near_bottom = y > height - threshold
+
+        if near_top and near_left:
+            return "top-left"
+        if near_top and near_right:
+            return "top-right"
+        if near_bottom and near_left:
+            return "bottom-left"
+        if near_bottom and near_right:
+            return "bottom-right"
+
+        if near_left:
+            return "left"
+        if near_right:
+            return "right"
+        if near_top:
+            return "top"
+        if near_bottom:
+            return "bottom"
+
+        return ""
+
+    def _update_cursor_for_position(self, x: int, y: int) -> None:
+        """Update cursor based on position relative to window edges."""
+        direction = self._get_resize_direction(x, y)
+
+        cursor_map = {
+            "top-left": Qt.SizeFDiagCursor,
+            "top-right": Qt.SizeBDiagCursor,
+            "bottom-left": Qt.SizeBDiagCursor,
+            "bottom-right": Qt.SizeFDiagCursor,
+            "left": Qt.SizeHorCursor,
+            "right": Qt.SizeHorCursor,
+            "top": Qt.SizeVerCursor,
+            "bottom": Qt.SizeVerCursor,
+        }
+
+        if direction in cursor_map:
+            self.setCursor(cursor_map[direction])
+        else:
+            self.setCursor(Qt.ArrowCursor)
+
     def mousePressEvent(self, event: QEvent) -> None:
         if event.button() == Qt.LeftButton:
-            self.drag_position = event.globalPos() - self.frameGeometry().topLeft()
+            resize_direction = self._get_resize_direction(event.x(), event.y())
+            if resize_direction:
+                self.is_resizing = True
+                self.resize_direction = resize_direction
+            else:
+                self.drag_position = event.globalPos() - self.frameGeometry().topLeft()
             self.mouse_press_x = event.x()
             self.mouse_press_y = event.y()
 
     def mouseMoveEvent(self, event: QEvent) -> None:
-        if event.buttons() == Qt.LeftButton and self.drag_position is not None:
-            if event.y() < DRAG_THRESHOLD_Y:
-                self.move(event.globalPos() - self.drag_position)
+        self._update_cursor_for_position(event.x(), event.y())
+
+        if event.buttons() == Qt.LeftButton:
+            if self.is_resizing:
+                self._perform_resize(event)
+            elif self.drag_position is not None:
+                if event.y() < DRAG_THRESHOLD_Y:
+                    self.move(event.globalPos() - self.drag_position)
+
+    def _perform_resize(self, event: QEvent) -> None:
+        """Handle window resizing based on drag direction."""
+        geometry = self.frameGeometry()
+        global_pos = event.globalPos()
+
+        min_width = 200
+        min_height = 300
+
+        new_x = geometry.x()
+        new_y = geometry.y()
+        new_width = geometry.width()
+        new_height = geometry.height()
+
+        direction = self.resize_direction
+
+        delta_x = global_pos.x() - (self.mouse_press_x + geometry.x())
+        delta_y = global_pos.y() - (self.mouse_press_y + geometry.y())
+
+        if "left" in direction:
+            delta = global_pos.x() - geometry.x()
+            new_width = max(min_width, geometry.width() - delta)
+            new_x = geometry.x() + (geometry.width() - new_width)
+        if "right" in direction:
+            new_width = max(min_width, geometry.width() + delta_x)
+        if "top" in direction:
+            delta = global_pos.y() - geometry.y()
+            new_height = max(min_height, geometry.height() - delta)
+            new_y = geometry.y() + (geometry.height() - new_height)
+        if "bottom" in direction:
+            new_height = max(min_height, geometry.height() + delta_y)
+
+        self.setGeometry(new_x, new_y, new_width, new_height)
+        self.mouse_press_x = event.x()
+        self.mouse_press_y = event.y()
+
+    def mouseReleaseEvent(self, event: QEvent) -> None:
+        """Stop resizing when mouse is released."""
+        if event.button() == Qt.LeftButton:
+            self.is_resizing = False
+            self.resize_direction = ""
+            self.drag_position = None
 
     def mouseDoubleClickEvent(self, event: QEvent) -> None:
         item = self.todo_list.itemAt(
