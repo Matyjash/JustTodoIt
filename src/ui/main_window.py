@@ -15,7 +15,7 @@ from PyQt5.QtGui import QFont
 from typing import Optional
 from src.task import Task
 from src.ui.style import Style, DEFAULT_STYLE
-from src.ui.edit_task_window import EditTaskWindow
+from src.ui.edit_task_window import EditTaskDialog
 from src.ui.resizable_window import ResizableWindow
 
 WINDOW_TITLE = "Todo App"
@@ -228,12 +228,12 @@ class MainWindow(ResizableWindow):
             main_geometry.width(),
             main_geometry.height(),
         )
-        edit_window = EditTaskWindow(task, self.style, start_reference_position)
+        edit_dialog = EditTaskDialog(task, self.style, start_reference_position)
 
-        result = edit_window.exec_()
+        result = edit_dialog.exec_()
 
-        if result == QDialog.Accepted and edit_window.new_text:
-            task.text = edit_window.new_text
+        if result == QDialog.Accepted and edit_dialog.new_text:
+            task.text = edit_dialog.new_text
             self.task_file_storage.save_tasks(self.tasks)
             self.load_tasks()
 

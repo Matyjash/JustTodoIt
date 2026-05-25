@@ -37,8 +37,8 @@ CLOSE_BUTTON_HOVER_ALPHA = 0.3
 CLOSE_BUTTON_PRESSED_ALPHA = 0.5
 
 
-class EditTaskWindow(QDialog):
-    """Dialog window for editing a task."""
+class EditTaskDialog(QDialog):
+    """Dialog dialog for editing a task."""
 
     def __init__(
         self,
@@ -48,11 +48,11 @@ class EditTaskWindow(QDialog):
         parent=None,
     ):
         """
-        Initialize the EditTaskWindow.
+        Initialize the EditTaskDialog.
 
         Args:
             task: The Task object to edit
-            style: Style configuration for the window (default: DEFAULT_STYLE)
+            style: Style configuration for the dialog (default: DEFAULT_STYLE)
             start_reference_position: Tuple of (x, y, width, height) for positioning (default: None)
             parent: Parent widget
         """
