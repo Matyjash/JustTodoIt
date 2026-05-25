@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication
 from src.task_file_storage import TaskFileStorage
-from src.window import Window
+from src.ui.window import Window
 
 
 def main():

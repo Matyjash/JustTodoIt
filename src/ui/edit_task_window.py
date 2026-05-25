@@ -10,7 +10,7 @@ from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QFont
 from typing import Optional
 from src.task import Task
-from src.style import Style, DEFAULT_STYLE
+from src.ui.style import Style, DEFAULT_STYLE
 
 WINDOW_WIDTH = 400
 WINDOW_HEIGHT = 150

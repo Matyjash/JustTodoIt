@@ -13,8 +13,8 @@ from PyQt5.QtCore import Qt, QEvent, QSettings, QRect
 from PyQt5.QtGui import QFont, QCursor
 from typing import List, Optional
 from src.task import Task
-from src.style import Style, DEFAULT_STYLE
-from src.edit_task_window import EditTaskWindow
+from src.ui.style import Style, DEFAULT_STYLE
+from src.ui.edit_task_window import EditTaskWindow
 
 WINDOW_TITLE = "Todo App"
 WINDOW_X = 100
