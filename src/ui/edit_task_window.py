@@ -16,8 +16,6 @@ WINDOW_WIDTH = 400
 WINDOW_HEIGHT = 150
 
 CLOSE_BUTTON_TEXT = "✕"
-DRAG_THRESHOLD_Y = 50
-TITLE_BAR_HEIGHT = 30
 CONTROL_BUTTON_SIZE = 24
 
 TITLE_BAR_MARGIN_LEFT = 10
@@ -30,6 +28,8 @@ TITLE_BAR_LABEL_PADDING = "5px"
 
 CONTENT_MARGIN = 10
 CONTENT_SPACING = 10
+
+DRAG_THRESHOLD_Y = 50
 
 CONTROL_BUTTON_HOVER_ALPHA = 0.2
 CONTROL_BUTTON_PRESSED_ALPHA = 0.3
@@ -53,13 +53,14 @@ class EditTaskWindow(QDialog):
         Args:
             task: The Task object to edit
             style: Style configuration for the window (default: DEFAULT_STYLE)
-            start_reference_position: Tuple of (x, y) coordinates for positioning (default: None)
+            start_reference_position: Tuple of (x, y, width, height) for positioning (default: None)
             parent: Parent widget
         """
         super().__init__(parent)
         self.task = task
         self.style = style
         self.new_text: Optional[str] = None
+        self.drag_position: Optional[any] = None
         self.init_ui(start_reference_position)
         self.setWindowFlags(Qt.FramelessWindowHint)
 
@@ -83,12 +84,12 @@ class EditTaskWindow(QDialog):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
 
+        # Create title bar
         main_layout.addLayout(self._create_title_bar())
 
+        # Content layout
         content_layout = QVBoxLayout()
-        content_layout.setContentsMargins(
-            CONTENT_MARGIN, CONTENT_MARGIN, CONTENT_MARGIN, CONTENT_MARGIN
-        )
+        content_layout.setContentsMargins(CONTENT_MARGIN, CONTENT_MARGIN, CONTENT_MARGIN, CONTENT_MARGIN)
         content_layout.setSpacing(CONTENT_SPACING)
 
         self.input_field = QLineEdit()
@@ -114,7 +115,6 @@ class EditTaskWindow(QDialog):
         main_layout.addLayout(content_layout)
 
         self.setLayout(main_layout)
-        self.drag_position: Optional[any] = None
 
     def _create_title_bar(self) -> QHBoxLayout:
         """Create the title bar with close button."""
@@ -174,10 +174,17 @@ class EditTaskWindow(QDialog):
         self.reject()
 
     def mousePressEvent(self, event: QEvent) -> None:
+        """Handle mouse press for title bar dragging."""
         if event.button() == Qt.LeftButton:
             self.drag_position = event.globalPos() - self.frameGeometry().topLeft()
 
     def mouseMoveEvent(self, event: QEvent) -> None:
+        """Handle mouse move for title bar dragging."""
         if event.buttons() == Qt.LeftButton and self.drag_position is not None:
             if event.y() < DRAG_THRESHOLD_Y:
                 self.move(event.globalPos() - self.drag_position)
+
+    def mouseReleaseEvent(self, event: QEvent) -> None:
+        """Handle mouse release."""
+        if event.button() == Qt.LeftButton:
+            self.drag_position = None
