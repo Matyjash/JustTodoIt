@@ -8,6 +8,7 @@ __pycache__/
 
 # Customs
 todos.json
+settings.json
 
 # Distribution / packaging
 .Python

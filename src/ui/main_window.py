@@ -16,6 +16,7 @@ from typing import Optional
 from src.task import Task
 from src.ui.style import Style, DEFAULT_STYLE
 from src.ui.edit_task_window import EditTaskDialog
+from src.ui.settings_dialog import SettingsDialog
 from src.ui.resizable_window import ResizableWindow
 
 WINDOW_TITLE = "Todo App"
@@ -60,7 +61,9 @@ class MainWindow(ResizableWindow):
         self.init_ui()
 
     def init_ui(self) -> None:
-        self.init_window_base(WINDOW_TITLE, WINDOW_X, WINDOW_Y, WINDOW_WIDTH, WINDOW_HEIGHT)
+        self.init_window_base(
+            WINDOW_TITLE, WINDOW_X, WINDOW_Y, WINDOW_WIDTH, WINDOW_HEIGHT
+        )
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -69,21 +72,35 @@ class MainWindow(ResizableWindow):
         top_layout.setContentsMargins(0, 0, 0, 0)
         top_layout.setSpacing(0)
 
-        # Create title bar widget
         title_bar_widget = QWidget()
-        title_bar_widget.setStyleSheet(f"background-color: {self.style.title_bg_color};")
-        
-        # Create title bar layout and add buttons
+        title_bar_widget.setStyleSheet(
+            f"background-color: {self.style.title_bg_color};"
+        )
+
         title_bar_layout = self.create_title_bar(TITLE_TEXT)
+
+        settings_button = QPushButton("⚙")
+        settings_button.setMaximumWidth(35)
+        settings_button.setStyleSheet(
+            f"QPushButton {{ background-color: transparent; color: {self.style.title_text_color}; "
+            f"border: none; font-size: 16px; padding: 0px; }}"
+            f"QPushButton:hover {{ background-color: rgba(255, 255, 255, {CONTROL_BUTTON_HOVER_ALPHA}); }}"
+            f"QPushButton:pressed {{ background-color: rgba(255, 255, 255, {CONTROL_BUTTON_PRESSED_ALPHA}); }}"
+        )
+        settings_button.clicked.connect(self.open_settings)
+        title_bar_layout.addWidget(settings_button)
+
         self.add_minimize_button(title_bar_layout)
         self.add_maximize_button(title_bar_layout)
         self.add_close_button(title_bar_layout)
-        
+
         title_bar_widget.setLayout(title_bar_layout)
         top_layout.addWidget(title_bar_widget)
 
         self.main_layout = QVBoxLayout()
-        self.main_layout.setContentsMargins(WINDOW_MARGIN, WINDOW_MARGIN, WINDOW_MARGIN, WINDOW_MARGIN)
+        self.main_layout.setContentsMargins(
+            WINDOW_MARGIN, WINDOW_MARGIN, WINDOW_MARGIN, WINDOW_MARGIN
+        )
         self.main_layout.setSpacing(WINDOW_SPACING)
 
         self._init_input_layout()
@@ -241,6 +258,13 @@ class MainWindow(ResizableWindow):
         self.tasks.clear()
         self.todo_list.clear()
         self.task_file_storage.save_tasks(self.tasks)
+
+    def open_settings(self) -> None:
+        """
+        Open the settings dialog.
+        """
+        settings_dialog = SettingsDialog(self, self.style)
+        settings_dialog.exec_()
 
     def mouseDoubleClickItem(self, item: QListWidgetItem) -> None:
         task = item.data(Qt.UserRole)
