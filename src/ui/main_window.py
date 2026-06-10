@@ -79,6 +79,7 @@ class MainWindow(ResizableWindow):
 
         title_bar_layout = self.create_title_bar(TITLE_TEXT)
 
+        #TODO: Replace with settings icon
         settings_button = QPushButton("⚙")
         settings_button.setMaximumWidth(35)
         settings_button.setStyleSheet(
