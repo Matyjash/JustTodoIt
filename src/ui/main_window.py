@@ -170,45 +170,54 @@ class MainWindow(ResizableWindow):
         button_layout.addWidget(clear_button)
         self.main_layout.addLayout(button_layout)
 
+    def _add_task_to_list(self, task: Task, task_index: int) -> None:
+        item = QListWidgetItem()
+        item.setData(Qt.UserRole, task)
+        item.setFont(
+            QFont(self.style.list_item_font_name, self.style.list_item_font_size)
+        )
+        self.todo_list.addItem(item)
+
+        item_widget = QWidget()
+        item_widget.setStyleSheet(f"background-color: {self.style.list_bg_color};")
+        item_layout = QHBoxLayout()
+        item_layout.setContentsMargins(0, 0, 0, 0)
+        item_layout.setSpacing(5)
+
+        task_label = QPushButton(str(task))
+        task_label.setStyleSheet(
+            f"QPushButton {{ background-color: transparent; color: black; border: none; text-align: left; padding: 0px; }}"
+        )
+        task_label.setEnabled(False)
+        item_layout.addWidget(task_label)
+
+        edit_button = QPushButton("E")
+        edit_button.setMaximumWidth(30)
+        edit_button.setStyleSheet(
+            f"QPushButton {{ background-color: {self.style.edit_btn_bg_color}; color: {self.style.edit_btn_text_color}; "
+            f"padding: {self.style.edit_btn_padding}; border: none; border-radius: 4px; }}"
+            f"QPushButton:hover {{ background-color: {self.style.edit_btn_hover_color}; }}"
+        )
+        edit_button.clicked.connect(
+            lambda checked, idx=task_index: self.open_edit_dialog(idx)
+        )
+        item_layout.addWidget(edit_button)
+
+        item_widget.setLayout(item_layout)
+        self.todo_list.setItemWidget(item, item_widget)
+
     def load_tasks(self) -> None:
+        """
+        Load and display all tasks from storage.
+        """
         self.todo_list.clear()
         for index, task in enumerate(self.tasks):
-            item = QListWidgetItem()
-            item.setData(Qt.UserRole, task)
-            item.setFont(
-                QFont(self.style.list_item_font_name, self.style.list_item_font_size)
-            )
-            self.todo_list.addItem(item)
-
-            item_widget = QWidget()
-            item_widget.setStyleSheet(f"background-color: {self.style.list_bg_color};")
-            item_layout = QHBoxLayout()
-            item_layout.setContentsMargins(0, 0, 0, 0)
-            item_layout.setSpacing(5)
-
-            task_label = QPushButton(str(task))
-            task_label.setStyleSheet(
-                f"QPushButton {{ background-color: transparent; color: black; border: none; text-align: left; padding: 0px; }}"
-            )
-            task_label.setEnabled(False)
-            item_layout.addWidget(task_label)
-
-            edit_button = QPushButton("E")
-            edit_button.setMaximumWidth(30)
-            edit_button.setStyleSheet(
-                f"QPushButton {{ background-color: {self.style.edit_btn_bg_color}; color: {self.style.edit_btn_text_color}; "
-                f"padding: {self.style.edit_btn_padding}; border: none; border-radius: 4px; }}"
-                f"QPushButton:hover {{ background-color: {self.style.edit_btn_hover_color}; }}"
-            )
-            edit_button.clicked.connect(
-                lambda checked, idx=index: self.open_edit_dialog(idx)
-            )
-            item_layout.addWidget(edit_button)
-
-            item_widget.setLayout(item_layout)
-            self.todo_list.setItemWidget(item, item_widget)
+            self._add_task_to_list(task, index)
 
     def add_todo(self) -> None:
+        """
+        Add a new task from the input field.
+        """
         text = self.input_field.text().strip()
         if not text:
             return
@@ -217,21 +226,14 @@ class MainWindow(ResizableWindow):
         self.tasks.append(task)
 
         item = QListWidgetItem()
-        item.setText(str(task))
         item.setData(Qt.UserRole, task)
         item.setFont(
             QFont(self.style.list_item_font_name, self.style.list_item_font_size)
         )
-        self.todo_list.addItem(item)
-        self.input_field.clear()
-        self.task_file_storage.save_tasks(self.tasks)
 
-    def delete_todo(self) -> None:
-        row = self.todo_list.currentRow()
-        if row >= 0:
-            self.tasks.pop(row)
-            self.todo_list.takeItem(row)
-            self.task_file_storage.save_tasks(self.tasks)
+        task_index = len(self.tasks) - 1
+        self.task_file_storage.save_tasks(self.tasks)
+        self._add_task_to_list(task, task_index)
 
     def open_edit_dialog(self, task_index: int) -> None:
         if task_index < 0 or task_index >= len(self.tasks):
@@ -253,6 +255,22 @@ class MainWindow(ResizableWindow):
             task.text = edit_dialog.new_text
             self.task_file_storage.save_tasks(self.tasks)
             self.load_tasks()
+
+    def delete_todo(self) -> None:
+        """
+        Delete the selected task from the list and storage.
+        """
+        selected_items = self.todo_list.selectedItems()
+        if not selected_items:
+            return
+
+        for item in selected_items:
+            task = item.data(Qt.UserRole)
+            if task in self.tasks:
+                self.tasks.remove(task)
+                self.todo_list.takeItem(self.todo_list.row(item))
+
+        self.task_file_storage.save_tasks(self.tasks)
 
     def clear_all(self) -> None:
         self.tasks.clear()
