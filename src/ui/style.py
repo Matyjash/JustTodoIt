@@ -49,5 +49,10 @@ class Style:
     save_btn_padding: str = "8px 15px"
     save_btn_hover_color: str = "#45a049"
 
+    task_status_not_done_color: str = "#BDBDBD"
+    task_status_done_color: str = "#4CAF50"
+    task_status_square_size: int = 20
+    task_status_square_padding: str = "4px"
+
 
 DEFAULT_STYLE = Style()

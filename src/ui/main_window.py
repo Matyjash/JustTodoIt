@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QDialog,
 )
-from PyQt5.QtCore import Qt, QEvent
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 from typing import Optional
 from src.task import Task
@@ -185,7 +185,19 @@ class MainWindow(ResizableWindow):
         item_layout.setContentsMargins(0, 0, 0, 0)
         item_layout.setSpacing(5)
 
-        task_label = QPushButton(str(task))
+        status_color = self.style.task_status_done_color if task.done else self.style.task_status_not_done_color
+        status_square = QPushButton()
+        status_square.setMaximumSize(self.style.task_status_square_size, self.style.task_status_square_size)
+        status_square.setStyleSheet(
+            f"QPushButton {{ background-color: {status_color}; border: none; border-radius: 2px; padding: {self.style.task_status_square_padding}; }}"
+            f"QPushButton:hover {{ opacity: 0.8; }}"
+        )
+        status_square.clicked.connect(
+            lambda checked, idx=task_index: self._toggle_task(idx)
+        )
+        item_layout.addWidget(status_square)
+
+        task_label = QPushButton(task.text)
         task_label.setStyleSheet(
             f"QPushButton {{ background-color: transparent; color: black; border: none; text-align: left; padding: 0px; }}"
         )
@@ -285,19 +297,12 @@ class MainWindow(ResizableWindow):
         settings_dialog = SettingsDialog(self, self.style)
         settings_dialog.exec_()
 
-    def mouseDoubleClickItem(self, item: QListWidgetItem) -> None:
-        task = item.data(Qt.UserRole)
-        if task:
-            task.toggle()
-            item.setText(str(task))
-            self.task_file_storage.save_tasks(self.tasks)
-
-    def mouseDoubleClickEvent(self, event: QEvent) -> None:
-        item = self.todo_list.itemAt(
-            self.todo_list.mapFromGlobal(self.mapToGlobal(event.pos()))
-        )
-        if item:
-            self.mouseDoubleClickItem(item)
+    def _toggle_task(self, task_index: int) -> None:
+        if task_index < 0 or task_index >= len(self.tasks):
+            return
+        self.tasks[task_index].toggle()
+        self.task_file_storage.save_tasks(self.tasks)
+        self.load_tasks()
 
     def display(self) -> None:
         self.show()
