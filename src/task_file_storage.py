@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime
 from typing import List
 from src.task import Task
 
@@ -24,7 +25,18 @@ class TaskFileStorage:
         try:
             with open(file_path, "r") as f:
                 data = json.load(f)
-                tasks = [Task(text=item["text"], done=item["done"]) for item in data]
+                tasks = []
+                for item in data:
+                    created_at = item.get("created_at")
+                    if not created_at:
+                        created_at = datetime.now().strftime(Task.TIME_FORMAT)
+                    task = Task(
+                        text=item["text"],
+                        done=item["done"],
+                        created_at=created_at,
+                        completed_at=item.get("completed_at")
+                    )
+                    tasks.append(task)
                 return tasks
         except (json.JSONDecodeError, KeyError, IOError):
             return []
@@ -33,7 +45,15 @@ class TaskFileStorage:
     def save_tasks(tasks: List[Task]) -> None:
         file_path = TaskFileStorage.get_file_path()
 
-        data = [{"text": task.text, "done": task.done} for task in tasks]
+        data = [
+            {
+                "text": task.text,
+                "done": task.done,
+                "created_at": task.created_at,
+                "completed_at": task.completed_at
+            }
+            for task in tasks
+        ]
 
         try:
             with open(file_path, "w") as f:
