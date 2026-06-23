@@ -16,9 +16,5 @@ class Task:
         if self.done:
             self.completed_at = datetime.now().strftime(Task.TIME_FORMAT)
 
-    def __str__(self):
-        status = "[x]" if self.done else "☐"
-        return f"{status} {self.text}"
-
     def __repr__(self):
         return f"Task(text='{self.text}', done={self.done})"
