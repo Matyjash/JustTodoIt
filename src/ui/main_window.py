@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QPushButton,
     QDialog,
+    QAbstractItemView,
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
@@ -42,6 +43,26 @@ CONTROL_BUTTON_HOVER_ALPHA = 0.2
 CONTROL_BUTTON_PRESSED_ALPHA = 0.3
 CLOSE_BUTTON_HOVER_ALPHA = 0.3
 CLOSE_BUTTON_PRESSED_ALPHA = 0.5
+
+
+class DraggableTodoList(QListWidget):
+    """List widget that supports drag-and-drop reordering without losing rows."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setDragEnabled(True)
+        self.setAcceptDrops(True)
+        self.setDropIndicatorShown(True)
+        self.setDragDropMode(QAbstractItemView.InternalMove)
+        self.setDefaultDropAction(Qt.MoveAction)
+        self.setSelectionMode(QAbstractItemView.SingleSelection)
+
+    def dropEvent(self, event):
+        super().dropEvent(event)
+        parent = self.parent()
+        if parent is not None and hasattr(parent, "_sync_tasks_from_list"):
+            parent._sync_tasks_from_list()
+        event.acceptProposedAction()
 
 
 class MainWindow(ResizableWindow):
@@ -139,7 +160,7 @@ class MainWindow(ResizableWindow):
         self.main_layout.addLayout(input_layout)
 
     def _init_todo_list(self) -> None:
-        self.todo_list = QListWidget()
+        self.todo_list = DraggableTodoList()
         self.todo_list.setStyleSheet(
             f"QListWidget {{ border: {self.style.list_border}; border-radius: {self.style.list_border_radius}; "
             f"background-color: {self.style.list_bg_color}; }}"
@@ -177,6 +198,7 @@ class MainWindow(ResizableWindow):
         item.setFont(
             QFont(self.style.list_item_font_name, self.style.list_item_font_size)
         )
+        item.setFlags(item.flags() | Qt.ItemIsDragEnabled)
         self.todo_list.addItem(item)
 
         item_widget = QWidget()
@@ -223,6 +245,7 @@ class MainWindow(ResizableWindow):
         """
         Load and display all tasks from storage.
         """
+        self.tasks = sorted(self.tasks, key=lambda task: task.order)
         self.todo_list.clear()
         for index, task in enumerate(self.tasks):
             self._add_task_to_list(task, index)
@@ -235,18 +258,13 @@ class MainWindow(ResizableWindow):
         if not text:
             return
 
-        task = Task(text=text, done=False)
+        task = Task(text=text, done=False, order=len(self.tasks))
         self.tasks.append(task)
-
-        item = QListWidgetItem()
-        item.setData(Qt.UserRole, task)
-        item.setFont(
-            QFont(self.style.list_item_font_name, self.style.list_item_font_size)
-        )
 
         task_index = len(self.tasks) - 1
         self.task_file_storage.save_tasks(self.tasks)
         self._add_task_to_list(task, task_index)
+        self.input_field.clear()
 
     def open_edit_dialog(self, task_index: int) -> None:
         if task_index < 0 or task_index >= len(self.tasks):
@@ -277,13 +295,14 @@ class MainWindow(ResizableWindow):
         if not selected_items:
             return
 
-        for item in selected_items:
-            task = item.data(Qt.UserRole)
+        selected_tasks = [item.data(Qt.UserRole) for item in selected_items]
+        for task in selected_tasks:
             if task in self.tasks:
                 self.tasks.remove(task)
-                self.todo_list.takeItem(self.todo_list.row(item))
 
+        self._normalize_task_orders()
         self.task_file_storage.save_tasks(self.tasks)
+        self.load_tasks()
 
     def clear_all(self) -> None:
         self.tasks.clear()
@@ -296,6 +315,40 @@ class MainWindow(ResizableWindow):
         """
         settings_dialog = SettingsDialog(self, self.style)
         settings_dialog.exec_()
+
+    def _normalize_task_orders(self) -> None:
+        for index, task in enumerate(self.tasks):
+            task.order = index
+
+    def _sync_tasks_from_list(self) -> None:
+        reordered_tasks = []
+        for row in range(self.todo_list.count()):
+            item = self.todo_list.item(row)
+            task = item.data(Qt.UserRole)
+            if task is not None:
+                reordered_tasks.append(task)
+
+        self.tasks = reordered_tasks
+        self._normalize_task_orders()
+        self.task_file_storage.save_tasks(self.tasks)
+        self.load_tasks()
+
+    def _move_task_in_list(self, from_row: int, to_row: int) -> None:
+        if from_row < 0 or from_row >= len(self.tasks):
+            return
+
+        task = self.tasks.pop(from_row)
+        if to_row < 0:
+            to_row = 0
+        if to_row > len(self.tasks):
+            to_row = len(self.tasks)
+        if to_row > from_row:
+            to_row = max(0, to_row - 1)
+        self.tasks.insert(to_row, task)
+
+        self._normalize_task_orders()
+        self.task_file_storage.save_tasks(self.tasks)
+        self.load_tasks()
 
     def _toggle_task(self, task_index: int) -> None:
         if task_index < 0 or task_index >= len(self.tasks):
