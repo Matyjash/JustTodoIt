@@ -2,6 +2,7 @@ import json
 import os
 from datetime import datetime
 from typing import List
+from src.app_data import get_data_file_path
 from src.task import Task
 
 
@@ -18,8 +19,7 @@ class TaskFileStorage:
 
     @staticmethod
     def get_file_path() -> str:
-        app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        return os.path.join(app_dir, TaskFileStorage.FILENAME)
+        return get_data_file_path(TaskFileStorage.FILENAME)
 
     @staticmethod
     def _normalize_task_orders(tasks: List[Task]) -> None:
@@ -75,6 +75,7 @@ class TaskFileStorage:
         ]
 
         try:
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
             with open(file_path, "w") as f:
                 json.dump(data, f, indent=2)
         except IOError as e:

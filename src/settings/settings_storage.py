@@ -1,6 +1,7 @@
 import json
 import os
 from typing import List
+from src.app_data import get_data_file_path
 from src.settings.setting import Setting
 
 
@@ -11,10 +12,7 @@ class SettingsStorage:
 
     @staticmethod
     def get_file_path() -> str:
-        app_dir = os.path.dirname(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        )
-        return os.path.join(app_dir, SettingsStorage.FILENAME)
+        return get_data_file_path(SettingsStorage.FILENAME)
 
     @staticmethod
     def load_settings() -> dict:
@@ -49,6 +47,7 @@ class SettingsStorage:
         file_path = SettingsStorage.get_file_path()
 
         try:
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
             with open(file_path, "w") as f:
                 json.dump(settings_dict, f, indent=2)
         except IOError as e:
