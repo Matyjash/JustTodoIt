@@ -13,7 +13,6 @@ from src.ui.style import Style, DEFAULT_STYLE
 from src.settings.settings_storage import SettingsStorage
 import platform
 import os
-import winreg
 
 WINDOW_WIDTH = 400
 WINDOW_HEIGHT = 250
@@ -222,6 +221,8 @@ class SettingsDialog(QDialog):
         """
         Add app to Windows startup.
         """
+        import winreg
+
         try:
             if getattr(__import__("sys"), "frozen", False):
                 exe_path = __import__("sys").executable
@@ -244,6 +245,8 @@ class SettingsDialog(QDialog):
         """
         Remove app from Windows startup.
         """
+        import winreg
+
         try:
             key = winreg.OpenKey(
                 winreg.HKEY_CURRENT_USER,
