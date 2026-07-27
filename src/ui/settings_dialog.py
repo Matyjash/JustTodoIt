@@ -12,7 +12,7 @@ from PyQt5.QtGui import QFont
 from src.ui.style import Style, DEFAULT_STYLE
 from src.settings.settings_storage import SettingsStorage
 import platform
-import os
+import sys
 
 WINDOW_WIDTH = 400
 WINDOW_HEIGHT = 250
@@ -94,13 +94,14 @@ class SettingsDialog(QDialog):
         )
         content_layout.setSpacing(CONTENT_SPACING)
 
-        boot_label = QLabel("Launch on system boot:")
-        content_layout.addWidget(boot_label)
+        if self._is_boot_launch_supported():
+            boot_label = QLabel("Launch on system boot:")
+            content_layout.addWidget(boot_label)
 
-        self.boot_checkbox = QCheckBox("Enable")
-        self.boot_checkbox.setChecked(self.settings.get("launch_on_boot", False))
-        self.boot_checkbox.stateChanged.connect(self.on_boot_checkbox_changed)
-        content_layout.addWidget(self.boot_checkbox)
+            self.boot_checkbox = QCheckBox("Enable")
+            self.boot_checkbox.setChecked(self.settings.get("launch_on_boot", False))
+            self.boot_checkbox.stateChanged.connect(self.on_boot_checkbox_changed)
+            content_layout.addWidget(self.boot_checkbox)
 
         if platform.system() == "Windows":
             info_label = QLabel(
@@ -130,10 +131,18 @@ class SettingsDialog(QDialog):
         main_layout.addLayout(content_layout)
         self.setLayout(main_layout)
 
+    @staticmethod
+    def _is_boot_launch_supported() -> bool:
+        """Return whether this installation can register itself for Windows startup."""
+        return platform.system() == "Windows" and getattr(sys, "frozen", False)
+
     def on_boot_checkbox_changed(self) -> None:
         """
         Handle boot checkbox state change.
         """
+        if not self._is_boot_launch_supported():
+            return
+
         is_checked = self.boot_checkbox.isChecked()
         self.settings["launch_on_boot"] = is_checked
         SettingsStorage.save_settings(self.settings)
@@ -224,22 +233,18 @@ class SettingsDialog(QDialog):
         import winreg
 
         try:
-            if getattr(__import__("sys"), "frozen", False):
-                exe_path = __import__("sys").executable
-            else:
-                exe_path = os.path.abspath("app.py")
-                exe_path = f'"{os.path.dirname(exe_path)}/dist/JustTodoIt.exe"'
-
-            key = winreg.OpenKey(
+            executable_path = f'"{sys.executable}"'
+            with winreg.OpenKey(
                 winreg.HKEY_CURRENT_USER,
                 r"Software\Microsoft\Windows\CurrentVersion\Run",
                 0,
                 winreg.KEY_SET_VALUE,
-            )
-            winreg.SetValueEx(key, "JustTodoIt", 0, winreg.REG_SZ, exe_path)
-            winreg.CloseKey(key)
-        except Exception as e:
-            print(f"Error enabling boot startup: {e}")
+            ) as key:
+                winreg.SetValueEx(
+                    key, "JustTodoIt", 0, winreg.REG_SZ, executable_path
+                )
+        except OSError as error:
+            print(f"Error enabling boot startup: {error}")
 
     def _disable_boot_windows(self) -> None:
         """
@@ -248,16 +253,15 @@ class SettingsDialog(QDialog):
         import winreg
 
         try:
-            key = winreg.OpenKey(
+            with winreg.OpenKey(
                 winreg.HKEY_CURRENT_USER,
                 r"Software\Microsoft\Windows\CurrentVersion\Run",
                 0,
                 winreg.KEY_SET_VALUE,
-            )
-            winreg.DeleteValue(key, "JustTodoIt")
-            winreg.CloseKey(key)
-        except Exception as e:
-            print(f"Error disabling boot startup: {e}")
+            ) as key:
+                winreg.DeleteValue(key, "JustTodoIt")
+        except OSError as error:
+            print(f"Error disabling boot startup: {error}")
 
     def _enable_boot_macos(self) -> None:
         """
