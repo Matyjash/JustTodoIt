@@ -58,12 +58,25 @@ class DraggableTodoList(QListWidget):
         self.setDragDropMode(QAbstractItemView.InternalMove)
         self.setDefaultDropAction(Qt.MoveAction)
         self.setSelectionMode(QAbstractItemView.SingleSelection)
+        self._dragged_row = -1
+
+    def startDrag(self, supported_actions) -> None:
+        self._dragged_row = self.currentRow()
+        super().startDrag(supported_actions)
 
     def dropEvent(self, event):
-        super().dropEvent(event)
         window = self.window()
-        if window is not None and hasattr(window, "_sync_tasks_from_list"):
-            window._sync_tasks_from_list()
+        target_row = self.indexAt(event.pos()).row()
+
+        if target_row < 0:
+            target_row = self.count()
+        elif event.pos().y() > self.visualItemRect(self.item(target_row)).center().y():
+            target_row += 1
+
+        if window is not None and hasattr(window, "_move_task_in_list"):
+            window._move_task_in_list(self._dragged_row, target_row)
+
+        self._dragged_row = -1
         event.acceptProposedAction()
 
     def start_drag_from_item(self, item: QListWidgetItem) -> None:
