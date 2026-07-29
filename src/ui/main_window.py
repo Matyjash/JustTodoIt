@@ -239,6 +239,7 @@ class MainWindow(ResizableWindow):
         item_layout.addWidget(edit_button)
 
         item_widget.setLayout(item_layout)
+        item.setSizeHint(QSize(0, TASK_ROW_HEIGHT))
         self.todo_list.setItemWidget(item, item_widget)
 
     def load_tasks(self) -> None:
