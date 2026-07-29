@@ -10,8 +10,9 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QDialog,
     QAbstractItemView,
+    QApplication,
 )
-from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtCore import Qt, QEvent, QSize
 from PyQt5.QtGui import QFont
 from typing import Optional
 from src.task import Task
@@ -62,7 +63,68 @@ class DraggableTodoList(QListWidget):
         super().dropEvent(event)
         window = self.window()
         if window is not None and hasattr(window, "_sync_tasks_from_list"):
+            window._sync_tasks_from_list()
         event.acceptProposedAction()
+
+    def start_drag_from_item(self, item: QListWidgetItem) -> None:
+        """Start dragging a task when its custom row receives the gesture."""
+        self.setCurrentItem(item)
+        self.startDrag(Qt.MoveAction)
+
+
+class DraggableTaskRow(QWidget):
+    """A task row that forwards drag gestures from its child controls."""
+
+    def __init__(self, todo_list: DraggableTodoList, item: QListWidgetItem):
+        super().__init__()
+        self.todo_list = todo_list
+        self.item = item
+        self.drag_start_position = None
+        self.is_dragging = False
+
+    def add_drag_source(self, widget: QWidget) -> None:
+        """Allow a child widget to begin a list drag without disabling its click."""
+        widget.installEventFilter(self)
+
+    def eventFilter(self, watched, event):
+        if self._handle_drag_event(event):
+            return True
+        return super().eventFilter(watched, event)
+
+    def mousePressEvent(self, event) -> None:
+        if not self._handle_drag_event(event):
+            super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event) -> None:
+        if not self._handle_drag_event(event):
+            super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event) -> None:
+        if not self._handle_drag_event(event):
+            super().mouseReleaseEvent(event)
+
+    def _handle_drag_event(self, event) -> bool:
+        if event.type() == QEvent.MouseButtonPress and event.button() == Qt.LeftButton:
+            self.todo_list.setCurrentItem(self.item)
+            self.drag_start_position = event.globalPos()
+            self.is_dragging = False
+        elif (
+            event.type() == QEvent.MouseMove
+            and event.buttons() & Qt.LeftButton
+            and self.drag_start_position is not None
+        ):
+            distance = (event.globalPos() - self.drag_start_position).manhattanLength()
+            if distance >= QApplication.startDragDistance():
+                self.is_dragging = True
+                self.todo_list.start_drag_from_item(self.item)
+                return True
+        elif event.type() == QEvent.MouseButtonRelease:
+            should_consume_event = self.is_dragging
+            self.drag_start_position = None
+            self.is_dragging = False
+            return should_consume_event
+
+        return False
 
 
 class MainWindow(ResizableWindow):
@@ -201,7 +263,7 @@ class MainWindow(ResizableWindow):
         item.setFlags(item.flags() | Qt.ItemIsDragEnabled)
         self.todo_list.addItem(item)
 
-        item_widget = QWidget()
+        item_widget = DraggableTaskRow(self.todo_list, item)
         item_widget.setStyleSheet(f"background-color: {self.style.list_bg_color};")
         item_layout = QHBoxLayout()
         item_layout.setContentsMargins(0, 0, 0, 0)
@@ -217,6 +279,7 @@ class MainWindow(ResizableWindow):
         status_square.clicked.connect(
             lambda checked, idx=task_index: self._toggle_task(idx)
         )
+        item_widget.add_drag_source(status_square)
         item_layout.addWidget(status_square)
 
         task_label = QPushButton(task.text)
@@ -224,6 +287,7 @@ class MainWindow(ResizableWindow):
             f"QPushButton {{ background-color: transparent; color: black; border: none; text-align: left; padding: 0px; }}"
         )
         task_label.setEnabled(False)
+        item_widget.add_drag_source(task_label)
         item_layout.addWidget(task_label)
 
         edit_button = QPushButton("E")
@@ -236,6 +300,7 @@ class MainWindow(ResizableWindow):
         edit_button.clicked.connect(
             lambda checked, idx=task_index: self.open_edit_dialog(idx)
         )
+        item_widget.add_drag_source(edit_button)
         item_layout.addWidget(edit_button)
 
         item_widget.setLayout(item_layout)
