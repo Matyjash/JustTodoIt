@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (
     QDialog,
     QAbstractItemView,
 )
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QFont
 from typing import Optional
 from src.task import Task
@@ -27,6 +27,7 @@ WINDOW_WIDTH = 300
 WINDOW_HEIGHT = 600
 WINDOW_MARGIN = 10
 WINDOW_SPACING = 10
+TASK_ROW_HEIGHT = 36
 
 TITLE_TEXT = "Just ToDo It"
 INPUT_PLACEHOLDER = "Add a new task..."
@@ -59,9 +60,8 @@ class DraggableTodoList(QListWidget):
 
     def dropEvent(self, event):
         super().dropEvent(event)
-        parent = self.parent()
-        if parent is not None and hasattr(parent, "_sync_tasks_from_list"):
-            parent._sync_tasks_from_list()
+        window = self.window()
+        if window is not None and hasattr(window, "_sync_tasks_from_list"):
         event.acceptProposedAction()
 
 
@@ -164,7 +164,7 @@ class MainWindow(ResizableWindow):
         self.todo_list.setStyleSheet(
             f"QListWidget {{ border: {self.style.list_border}; border-radius: {self.style.list_border_radius}; "
             f"background-color: {self.style.list_bg_color}; }}"
-            f"QListWidget::item {{ padding: {self.style.list_item_padding}; border-bottom: {self.style.list_item_border_bottom}; }}"
+            f"QListWidget::item {{ border-bottom: {self.style.list_item_border_bottom}; }}"
             f"QListWidget::item:selected {{ background-color: {self.style.list_item_selected_bg}; }}"
         )
         self.main_layout.addWidget(self.todo_list)
