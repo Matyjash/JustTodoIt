@@ -18,7 +18,7 @@ from typing import Optional
 from src.task import Task
 from src.ui.style import Style, DEFAULT_STYLE
 from src.ui.edit_task_window import EditTaskDialog
-from src.ui.settings_dialog import SettingsDialog
+from src.ui.settings.settings_dialog import SettingsDialog
 from src.ui.resizable_window import ResizableWindow
 
 WINDOW_TITLE = "Todo App"
