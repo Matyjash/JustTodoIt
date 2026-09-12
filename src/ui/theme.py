@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class Style:
+class Theme:
     window_background: str = "#f0f0f0"
 
     title_font_name: str = "Arial"
@@ -55,4 +55,4 @@ class Style:
     task_status_square_padding: str = "4px"
 
 
-DEFAULT_STYLE = Style()
+DEFAULT_THEME = Theme()

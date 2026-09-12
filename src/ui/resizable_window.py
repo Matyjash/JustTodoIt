@@ -9,14 +9,14 @@ MIN_HEIGHT = 300
 class ResizableWindow(Window):
     """Window that can be resized by dragging edges and corners."""
 
-    def __init__(self, style=None):
+    def __init__(self, theme=None):
         """
         Initialize the ResizableWindow.
 
         Args:
-            style: Style configuration for the window (optional)
+            theme: Theme configuration for the window (optional)
         """
-        super().__init__(style)
+        super().__init__(theme)
         self.is_resizing: bool = False
         self.resize_direction: str = ""
         self.last_mouse_x: int = 0

@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QCheckBox, QLabel
 from src.settings.settings_storage import SettingsStorage
 from src.settings.startup import Startup as StartupService
 from src.ui.settings.sections.setting import Setting
-from src.ui.style import Style
+from src.ui.theme import Theme
 
 
 SETTING_KEY = "startup"
@@ -17,9 +17,9 @@ INFO_LABEL_TEXT_COLOR = "gray"
 class Startup(Setting):
     """Provides the startup setting when the installed app supports it."""
 
-    def __init__(self, settings: dict, style: Style):
+    def __init__(self, settings: dict, theme: Theme):
         self.settings = settings
-        self.style = style
+        self.theme = theme
         self.startup_service = StartupService()
 
     def is_available(self) -> bool:

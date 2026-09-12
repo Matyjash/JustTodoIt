@@ -24,15 +24,15 @@ CLOSE_BUTTON_PRESSED_ALPHA = 0.5
 class Window(QMainWindow):
     """Base frameless window with title bar and dragging support."""
 
-    def __init__(self, style=None):
+    def __init__(self, theme=None):
         """
         Initialize the Window.
 
         Args:
-            style: Style configuration for the window (optional)
+            theme: Theme configuration for the window (optional)
         """
         super().__init__()
-        self.style = style
+        self.theme = theme
         self.drag_position = None
         self.mouse_press_x: int = 0
         self.mouse_press_y: int = 0
@@ -44,8 +44,8 @@ class Window(QMainWindow):
         self.setWindowTitle(window_title)
         self.setGeometry(window_x, window_y, window_width, window_height)
         self.setWindowFlags(Qt.FramelessWindowHint)
-        if self.style:
-            self.setStyleSheet(f"background-color: {self.style.window_background};")
+        if self.theme:
+            self.setStyleSheet(f"background-color: {self.theme.window_background};")
 
     def create_title_bar(self, title_text: str) -> QHBoxLayout:
         title_bar_layout = QHBoxLayout()
@@ -58,12 +58,12 @@ class Window(QMainWindow):
         title_bar_layout.setSpacing(TITLE_BAR_SPACING)
 
         title = QPushButton(title_text)
-        if self.style:
+        if self.theme:
             title.setFont(
-                QFont(self.style.title_font_name, self.style.title_font_size, QFont.Bold)
+                QFont(self.theme.title_font_name, self.theme.title_font_size, QFont.Bold)
             )
             title.setStyleSheet(
-                f"QPushButton {{ background-color: transparent; color: {self.style.title_text_color}; "
+                f"QPushButton {{ background-color: transparent; color: {self.theme.title_text_color}; "
                 f"border: none; padding: {TITLE_BAR_LABEL_PADDING}; text-align: left; }}"
             )
         title.setEnabled(False)
@@ -77,9 +77,9 @@ class Window(QMainWindow):
         """Add minimize button to title bar."""
         minimize_btn = QPushButton("_")
         minimize_btn.setMaximumWidth(CONTROL_BUTTON_SIZE)
-        if self.style:
+        if self.theme:
             minimize_btn.setStyleSheet(
-                f"QPushButton {{ background-color: transparent; color: {self.style.title_text_color}; border: none; "
+                f"QPushButton {{ background-color: transparent; color: {self.theme.title_text_color}; border: none; "
                 f"padding: {TITLE_BAR_BUTTON_PADDING}; font-weight: bold; }} "
                 f"QPushButton:hover {{ background-color: rgba(0, 0, 0, {CONTROL_BUTTON_HOVER_ALPHA}); }} "
                 f"QPushButton:pressed {{ background-color: rgba(0, 0, 0, {CONTROL_BUTTON_PRESSED_ALPHA}); }}"
@@ -91,9 +91,9 @@ class Window(QMainWindow):
         """Add maximize button to title bar."""
         self.maximize_btn = QPushButton("□")
         self.maximize_btn.setMaximumWidth(CONTROL_BUTTON_SIZE)
-        if self.style:
+        if self.theme:
             self.maximize_btn.setStyleSheet(
-                f"QPushButton {{ background-color: transparent; color: {self.style.title_text_color}; border: none; "
+                f"QPushButton {{ background-color: transparent; color: {self.theme.title_text_color}; border: none; "
                 f"padding: {TITLE_BAR_BUTTON_PADDING}; font-weight: bold; }} "
                 f"QPushButton:hover {{ background-color: rgba(0, 0, 0, {CONTROL_BUTTON_HOVER_ALPHA}); }} "
                 f"QPushButton:pressed {{ background-color: rgba(0, 0, 0, {CONTROL_BUTTON_PRESSED_ALPHA}); }}"
@@ -106,9 +106,9 @@ class Window(QMainWindow):
         """Add close button to title bar."""
         close_btn = QPushButton("✕")
         close_btn.setMaximumWidth(CONTROL_BUTTON_SIZE)
-        if self.style:
+        if self.theme:
             close_btn.setStyleSheet(
-                f"QPushButton {{ background-color: transparent; color: {self.style.title_text_color}; border: none; "
+                f"QPushButton {{ background-color: transparent; color: {self.theme.title_text_color}; border: none; "
                 f"padding: {TITLE_BAR_BUTTON_PADDING}; font-weight: bold; }} "
                 f"QPushButton:hover {{ background-color: rgba(255, 0, 0, {CLOSE_BUTTON_HOVER_ALPHA}); }} "
                 f"QPushButton:pressed {{ background-color: rgba(255, 0, 0, {CLOSE_BUTTON_PRESSED_ALPHA}); }}"

@@ -3,7 +3,7 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QWidget
 from src.settings.settings_storage import SettingsStorage
 from src.ui.settings.sections.startup import Startup
-from src.ui.style import DEFAULT_STYLE, Style
+from src.ui.theme import DEFAULT_THEME, Theme
 
 
 WINDOW_WIDTH = 400
@@ -34,17 +34,17 @@ CLOSE_BUTTON_PRESSED_ALPHA = 0.5
 class SettingsDialog(QDialog):
     """Displays and coordinates the available settings sections."""
 
-    def __init__(self, parent=None, style: Style = DEFAULT_STYLE):
+    def __init__(self, parent=None, theme: Theme = DEFAULT_THEME):
         super().__init__(parent)
-        self.style = style
+        self.theme = theme
         self.settings = SettingsStorage.load_settings()
         self.drag_position = None
-        self.sections = [Startup(self.settings, self.style)]
+        self.sections = [Startup(self.settings, self.theme)]
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog)
         self._init_ui()
 
     def _init_ui(self) -> None:
-        self.setStyleSheet(f"background-color: {self.style.window_background};")
+        self.setStyleSheet(f"background-color: {self.theme.window_background};")
         self.resize(WINDOW_WIDTH, WINDOW_HEIGHT)
         self._center_on_parent()
 
@@ -83,7 +83,7 @@ class SettingsDialog(QDialog):
 
     def _create_title_bar(self) -> QHBoxLayout:
         title_bar_widget = QWidget()
-        title_bar_widget.setStyleSheet(f"background-color: {self.style.title_bg_color};")
+        title_bar_widget.setStyleSheet(f"background-color: {self.theme.title_bg_color};")
 
         title_bar_layout = QHBoxLayout()
         title_bar_layout.setContentsMargins(
@@ -106,10 +106,10 @@ class SettingsDialog(QDialog):
     def _create_title_label(self) -> QPushButton:
         title = QPushButton(SETTINGS_TITLE)
         title.setFont(
-            QFont(self.style.title_font_name, self.style.title_font_size, QFont.Bold)
+            QFont(self.theme.title_font_name, self.theme.title_font_size, QFont.Bold)
         )
         title.setStyleSheet(
-            f"QPushButton {{ background-color: transparent; color: {self.style.title_text_color}; "
+            f"QPushButton {{ background-color: transparent; color: {self.theme.title_text_color}; "
             f"border: none; padding: {TITLE_BAR_LABEL_PADDING}; text-align: left; }}"
         )
         title.setEnabled(False)
@@ -119,7 +119,7 @@ class SettingsDialog(QDialog):
         close_button = QPushButton(CLOSE_BUTTON_TEXT)
         close_button.setMaximumWidth(CONTROL_BUTTON_SIZE)
         close_button.setStyleSheet(
-            f"QPushButton {{ background-color: transparent; color: {self.style.title_text_color}; border: none; "
+            f"QPushButton {{ background-color: transparent; color: {self.theme.title_text_color}; border: none; "
             f"padding: {TITLE_BAR_BUTTON_PADDING}; font-weight: bold; }} "
             f"QPushButton:hover {{ background-color: rgba(255, 0, 0, {CLOSE_BUTTON_HOVER_ALPHA}); }} "
             f"QPushButton:pressed {{ background-color: rgba(255, 0, 0, {CLOSE_BUTTON_PRESSED_ALPHA}); }}"
@@ -131,9 +131,9 @@ class SettingsDialog(QDialog):
         button_layout = QHBoxLayout()
         close_button = QPushButton(CLOSE_DIALOG_BUTTON_TEXT)
         close_button.setStyleSheet(
-            f"QPushButton {{ background-color: {self.style.clear_btn_bg_color}; color: {self.style.clear_btn_text_color}; "
-            f"padding: {self.style.clear_btn_padding}; border: none; border-radius: 4px; }}"
-            f"QPushButton:hover {{ background-color: {self.style.clear_btn_hover_color}; }}"
+            f"QPushButton {{ background-color: {self.theme.clear_btn_bg_color}; color: {self.theme.clear_btn_text_color}; "
+            f"padding: {self.theme.clear_btn_padding}; border: none; border-radius: 4px; }}"
+            f"QPushButton:hover {{ background-color: {self.theme.clear_btn_hover_color}; }}"
         )
         close_button.clicked.connect(self.accept)
         button_layout.addStretch()

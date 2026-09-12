@@ -10,7 +10,7 @@ from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QFont
 from typing import Optional
 from src.task import Task
-from src.ui.style import Style, DEFAULT_STYLE
+from src.ui.theme import DEFAULT_THEME, Theme
 
 WINDOW_WIDTH = 400
 WINDOW_HEIGHT = 150
@@ -43,7 +43,7 @@ class EditTaskDialog(QDialog):
     def __init__(
         self,
         task: Task,
-        style: Style = DEFAULT_STYLE,
+        theme: Theme = DEFAULT_THEME,
         start_reference_position: Optional[tuple] = None,
         parent=None,
     ):
@@ -52,13 +52,13 @@ class EditTaskDialog(QDialog):
 
         Args:
             task: The Task object to edit
-            style: Style configuration for the dialog (default: DEFAULT_STYLE)
+            theme: Theme configuration for the dialog (default: DEFAULT_THEME)
             start_reference_position: Tuple of (x, y, width, height) for positioning (default: None)
             parent: Parent widget
         """
         super().__init__(parent)
         self.task = task
-        self.style = style
+        self.theme = theme
         self.new_text: Optional[str] = None
         self.drag_position: Optional[any] = None
         self.init_ui(start_reference_position)
@@ -78,7 +78,7 @@ class EditTaskDialog(QDialog):
             )
             self.move(x, y)
 
-        self.setStyleSheet(f"background-color: {self.style.window_background};")
+        self.setStyleSheet(f"background-color: {self.theme.window_background};")
 
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -95,7 +95,7 @@ class EditTaskDialog(QDialog):
         self.input_field = QLineEdit()
         self.input_field.setText(self.task.text)
         self.input_field.setStyleSheet(
-            f"QLineEdit {{ padding: {self.style.input_padding}; border: {self.style.input_border}; border-radius: {self.style.input_border_radius}; }}"
+            f"QLineEdit {{ padding: {self.theme.input_padding}; border: {self.theme.input_border}; border-radius: {self.theme.input_border_radius}; }}"
         )
         content_layout.addWidget(self.input_field)
 
@@ -104,9 +104,9 @@ class EditTaskDialog(QDialog):
 
         save_button = QPushButton("Save")
         save_button.setStyleSheet(
-            f"QPushButton {{ background-color: {self.style.save_btn_bg_color}; color: {self.style.save_btn_text_color}; "
-            f"padding: {self.style.save_btn_padding}; border: none; border-radius: 4px; }}"
-            f"QPushButton:hover {{ background-color: {self.style.save_btn_hover_color}; }}"
+            f"QPushButton {{ background-color: {self.theme.save_btn_bg_color}; color: {self.theme.save_btn_text_color}; "
+            f"padding: {self.theme.save_btn_padding}; border: none; border-radius: 4px; }}"
+            f"QPushButton:hover {{ background-color: {self.theme.save_btn_hover_color}; }}"
         )
         save_button.clicked.connect(self.save_task)
         button_layout.addWidget(save_button)
@@ -120,7 +120,7 @@ class EditTaskDialog(QDialog):
         """Create the title bar with close button."""
         title_bar_widget = QWidget()
         title_bar_widget.setStyleSheet(
-            f"background-color: {self.style.title_bg_color};"
+            f"background-color: {self.theme.title_bg_color};"
         )
         title_bar_layout = QHBoxLayout()
         title_bar_layout.setContentsMargins(
@@ -133,10 +133,10 @@ class EditTaskDialog(QDialog):
 
         title = QPushButton("Edit Task")
         title.setFont(
-            QFont(self.style.title_font_name, self.style.title_font_size, QFont.Bold)
+            QFont(self.theme.title_font_name, self.theme.title_font_size, QFont.Bold)
         )
         title.setStyleSheet(
-            f"QPushButton {{ background-color: transparent; color: {self.style.title_text_color}; "
+            f"QPushButton {{ background-color: transparent; color: {self.theme.title_text_color}; "
             f"border: none; padding: {TITLE_BAR_LABEL_PADDING}; text-align: left; }}"
         )
         title.setEnabled(False)
@@ -147,7 +147,7 @@ class EditTaskDialog(QDialog):
         close_btn = QPushButton(CLOSE_BUTTON_TEXT)
         close_btn.setMaximumWidth(CONTROL_BUTTON_SIZE)
         close_btn.setStyleSheet(
-            f"QPushButton {{ background-color: transparent; color: {self.style.title_text_color}; border: none; "
+            f"QPushButton {{ background-color: transparent; color: {self.theme.title_text_color}; border: none; "
             f"padding: {TITLE_BAR_BUTTON_PADDING}; font-weight: bold; }} "
             f"QPushButton:hover {{ background-color: rgba(255, 0, 0, {CLOSE_BUTTON_HOVER_ALPHA}); }} "
             f"QPushButton:pressed {{ background-color: rgba(255, 0, 0, {CLOSE_BUTTON_PRESSED_ALPHA}); }}"
