@@ -3,7 +3,7 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QWidget
 from src.settings.settings_storage import SettingsStorage
 from src.ui.settings.sections.startup import Startup
-from src.ui.theme import DEFAULT_THEME, Theme
+from src.ui.theme.theme import DEFAULT_THEME, Theme
 
 
 WINDOW_WIDTH = 400

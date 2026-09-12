@@ -16,7 +16,7 @@ from PyQt5.QtCore import Qt, QEvent, QSize
 from PyQt5.QtGui import QFont
 from typing import Optional
 from src.task import Task
-from src.ui.theme import DEFAULT_THEME, Theme
+from src.ui.theme.theme import DEFAULT_THEME, Theme
 from src.ui.edit_task_window import EditTaskDialog
 from src.ui.settings.settings_dialog import SettingsDialog
 from src.ui.resizable_window import ResizableWindow

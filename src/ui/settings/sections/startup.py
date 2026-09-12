@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QCheckBox, QLabel
 from src.settings.settings_storage import SettingsStorage
 from src.settings.startup import Startup as StartupService
 from src.ui.settings.sections.setting import Setting
-from src.ui.theme import Theme
+from src.ui.theme.theme import Theme
 
 
 SETTING_KEY = "startup"

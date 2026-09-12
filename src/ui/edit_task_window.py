@@ -10,7 +10,7 @@ from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QFont
 from typing import Optional
 from src.task import Task
-from src.ui.theme import DEFAULT_THEME, Theme
+from src.ui.theme.theme import DEFAULT_THEME, Theme
 
 WINDOW_WIDTH = 400
 WINDOW_HEIGHT = 150
