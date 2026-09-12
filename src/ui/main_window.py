@@ -156,10 +156,15 @@ class MainWindow(ResizableWindow):
         self.tasks = task_file_storage.load_tasks()
         self.init_ui()
 
-    def init_ui(self) -> None:
-        self.init_window_base(
-            WINDOW_TITLE, WINDOW_X, WINDOW_Y, WINDOW_WIDTH, WINDOW_HEIGHT
-        )
+    def init_ui(
+        self, restore_geometry: bool = True, initialize_window: bool = True
+    ) -> None:
+        if initialize_window:
+            self.init_window_base(
+                WINDOW_TITLE, WINDOW_X, WINDOW_Y, WINDOW_WIDTH, WINDOW_HEIGHT
+            )
+        else:
+            self.setStyleSheet(f"background-color: {self.theme.background_color};")
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -170,7 +175,7 @@ class MainWindow(ResizableWindow):
 
         title_bar_widget = QWidget()
         title_bar_widget.setStyleSheet(
-            f"background-color: {self.theme.title_bg_color};"
+            f"background-color: {self.theme.lead_color};"
         )
 
         title_bar_layout = self.create_title_bar(TITLE_TEXT)
@@ -179,7 +184,7 @@ class MainWindow(ResizableWindow):
         settings_button = QPushButton("⚙")
         settings_button.setMaximumWidth(35)
         settings_button.setStyleSheet(
-            f"QPushButton {{ background-color: transparent; color: {self.theme.title_text_color}; "
+            "QPushButton { background-color: transparent; color: white; "
             f"border: none; font-size: 16px; padding: 0px; }}"
             f"QPushButton:hover {{ background-color: rgba(255, 255, 255, {CONTROL_BUTTON_HOVER_ALPHA}); }}"
             f"QPushButton:pressed {{ background-color: rgba(255, 255, 255, {CONTROL_BUTTON_PRESSED_ALPHA}); }}"
@@ -208,9 +213,8 @@ class MainWindow(ResizableWindow):
         top_layout.addLayout(self.main_layout)
         central_widget.setLayout(top_layout)
 
-        self.restore_geometry()
-
-        self.restore_geometry()
+        if restore_geometry:
+            self.restore_geometry()
 
     def _init_input_layout(self) -> None:
         input_layout = QHBoxLayout()
@@ -218,15 +222,15 @@ class MainWindow(ResizableWindow):
         self.input_field = QLineEdit()
         self.input_field.setPlaceholderText(INPUT_PLACEHOLDER)
         self.input_field.setStyleSheet(
-            f"QLineEdit {{ padding: {self.theme.input_padding}; border: {self.theme.input_border}; border-radius: {self.theme.input_border_radius}; }}"
+            f"QLineEdit {{ color: {self.theme.text_color}; padding: {self.theme.input_padding}; border: 1px solid {self.theme.border_color}; border-radius: {self.theme.input_border_radius}; }}"
+            f"QLineEdit::placeholder {{ color: {self.theme.text_color}; }}"
         )
         self.input_field.returnPressed.connect(self.add_todo)
 
         add_button = QPushButton(ADD_BUTTON_TEXT)
         add_button.setStyleSheet(
-            f"QPushButton {{ background-color: {self.theme.add_btn_bg_color}; color: {self.theme.add_btn_text_color}; "
+            f"QPushButton {{ background-color: {self.theme.accept_color}; color: white; "
             f"padding: {self.theme.add_btn_padding}; border: none; border-radius: 4px; }}"
-            f"QPushButton:hover {{ background-color: {self.theme.add_btn_hover_color}; }}"
         )
         add_button.clicked.connect(self.add_todo)
 
@@ -237,10 +241,10 @@ class MainWindow(ResizableWindow):
     def _init_todo_list(self) -> None:
         self.todo_list = DraggableTodoList()
         self.todo_list.setStyleSheet(
-            f"QListWidget {{ border: {self.theme.list_border}; border-radius: {self.theme.list_border_radius}; "
-            f"background-color: {self.theme.list_bg_color}; }}"
-            f"QListWidget::item {{ border-bottom: {self.theme.list_item_border_bottom}; }}"
-            f"QListWidget::item:selected {{ background-color: {self.theme.list_item_selected_bg}; }}"
+            f"QListWidget {{ border: 1px solid {self.theme.border_color}; border-radius: {self.theme.list_border_radius}; "
+            f"background-color: {self.theme.surface_color}; }}"
+            f"QListWidget::item {{ border-bottom: 1px solid {self.theme.border_color}; }}"
+            f"QListWidget::item:selected {{ background-color: {self.theme.background_color}; }}"
         )
         self.main_layout.addWidget(self.todo_list)
 
@@ -249,17 +253,15 @@ class MainWindow(ResizableWindow):
 
         delete_button = QPushButton(DELETE_BUTTON_TEXT)
         delete_button.setStyleSheet(
-            f"QPushButton {{ background-color: {self.theme.delete_btn_bg_color}; color: {self.theme.delete_btn_text_color}; "
+            f"QPushButton {{ background-color: {self.theme.decline_color}; color: white; "
             f"padding: {self.theme.delete_btn_padding}; border: none; border-radius: 4px; }}"
-            f"QPushButton:hover {{ background-color: {self.theme.delete_btn_hover_color}; }}"
         )
         delete_button.clicked.connect(self.delete_todo)
 
         clear_button = QPushButton(CLEAR_BUTTON_TEXT)
         clear_button.setStyleSheet(
-            f"QPushButton {{ background-color: {self.theme.clear_btn_bg_color}; color: {self.theme.clear_btn_text_color}; "
+            f"QPushButton {{ background-color: {self.theme.lead_color}; color: white; "
             f"padding: {self.theme.clear_btn_padding}; border: none; border-radius: 4px; }}"
-            f"QPushButton:hover {{ background-color: {self.theme.clear_btn_hover_color}; }}"
         )
         clear_button.clicked.connect(self.clear_all)
 
@@ -277,12 +279,12 @@ class MainWindow(ResizableWindow):
         self.todo_list.addItem(item)
 
         item_widget = DraggableTaskRow(self.todo_list, item)
-        item_widget.setStyleSheet(f"background-color: {self.theme.list_bg_color};")
+        item_widget.setStyleSheet(f"background-color: {self.theme.surface_color};")
         item_layout = QHBoxLayout()
         item_layout.setContentsMargins(0, 0, 0, 0)
         item_layout.setSpacing(5)
 
-        status_color = self.theme.task_status_done_color if task.done else self.theme.task_status_not_done_color
+        status_color = self.theme.accept_color if task.done else self.theme.neutral_color
         status_square = QPushButton()
         status_square.setMaximumSize(self.theme.task_status_square_size, self.theme.task_status_square_size)
         status_square.setStyleSheet(
@@ -297,7 +299,7 @@ class MainWindow(ResizableWindow):
 
         task_label = QPushButton(task.text)
         task_label.setStyleSheet(
-            f"QPushButton {{ background-color: transparent; color: black; border: none; text-align: left; padding: 0px; }}"
+            f"QPushButton {{ background-color: transparent; color: {self.theme.text_color}; border: none; text-align: left; padding: 0px; }}"
         )
         task_label.setEnabled(False)
         item_widget.add_drag_source(task_label)
@@ -306,9 +308,8 @@ class MainWindow(ResizableWindow):
         edit_button = QPushButton("E")
         edit_button.setMaximumWidth(30)
         edit_button.setStyleSheet(
-            f"QPushButton {{ background-color: {self.theme.edit_btn_bg_color}; color: {self.theme.edit_btn_text_color}; "
+            f"QPushButton {{ background-color: {self.theme.neutral_color}; color: white; "
             f"padding: {self.theme.edit_btn_padding}; border: none; border-radius: 4px; }}"
-            f"QPushButton:hover {{ background-color: {self.theme.edit_btn_hover_color}; }}"
         )
         edit_button.clicked.connect(
             lambda checked, idx=task_index: self.open_edit_dialog(idx)
@@ -394,6 +395,11 @@ class MainWindow(ResizableWindow):
         """
         settings_dialog = SettingsDialog(self, self.theme)
         settings_dialog.exec_()
+
+    def set_theme(self, theme: Theme) -> None:
+        """Reloads the window using the selected theme."""
+        self.theme = theme
+        self.init_ui(restore_geometry=False, initialize_window=False)
 
     def _normalize_task_orders(self) -> None:
         for index, task in enumerate(self.tasks):

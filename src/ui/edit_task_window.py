@@ -78,7 +78,7 @@ class EditTaskDialog(QDialog):
             )
             self.move(x, y)
 
-        self.setStyleSheet(f"background-color: {self.theme.window_background};")
+        self.setStyleSheet(f"background-color: {self.theme.background_color};")
 
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -95,7 +95,8 @@ class EditTaskDialog(QDialog):
         self.input_field = QLineEdit()
         self.input_field.setText(self.task.text)
         self.input_field.setStyleSheet(
-            f"QLineEdit {{ padding: {self.theme.input_padding}; border: {self.theme.input_border}; border-radius: {self.theme.input_border_radius}; }}"
+            f"QLineEdit {{ color: {self.theme.text_color}; padding: {self.theme.input_padding}; border: 1px solid {self.theme.border_color}; border-radius: {self.theme.input_border_radius}; }}"
+            f"QLineEdit::placeholder {{ color: {self.theme.text_color}; }}"
         )
         content_layout.addWidget(self.input_field)
 
@@ -104,9 +105,8 @@ class EditTaskDialog(QDialog):
 
         save_button = QPushButton("Save")
         save_button.setStyleSheet(
-            f"QPushButton {{ background-color: {self.theme.save_btn_bg_color}; color: {self.theme.save_btn_text_color}; "
+            f"QPushButton {{ background-color: {self.theme.accept_color}; color: white; "
             f"padding: {self.theme.save_btn_padding}; border: none; border-radius: 4px; }}"
-            f"QPushButton:hover {{ background-color: {self.theme.save_btn_hover_color}; }}"
         )
         save_button.clicked.connect(self.save_task)
         button_layout.addWidget(save_button)
@@ -120,7 +120,7 @@ class EditTaskDialog(QDialog):
         """Create the title bar with close button."""
         title_bar_widget = QWidget()
         title_bar_widget.setStyleSheet(
-            f"background-color: {self.theme.title_bg_color};"
+            f"background-color: {self.theme.lead_color};"
         )
         title_bar_layout = QHBoxLayout()
         title_bar_layout.setContentsMargins(
@@ -136,7 +136,7 @@ class EditTaskDialog(QDialog):
             QFont(self.theme.title_font_name, self.theme.title_font_size, QFont.Bold)
         )
         title.setStyleSheet(
-            f"QPushButton {{ background-color: transparent; color: {self.theme.title_text_color}; "
+            "QPushButton { background-color: transparent; color: white; "
             f"border: none; padding: {TITLE_BAR_LABEL_PADDING}; text-align: left; }}"
         )
         title.setEnabled(False)
@@ -147,7 +147,7 @@ class EditTaskDialog(QDialog):
         close_btn = QPushButton(CLOSE_BUTTON_TEXT)
         close_btn.setMaximumWidth(CONTROL_BUTTON_SIZE)
         close_btn.setStyleSheet(
-            f"QPushButton {{ background-color: transparent; color: {self.theme.title_text_color}; border: none; "
+            "QPushButton { background-color: transparent; color: white; border: none; "
             f"padding: {TITLE_BAR_BUTTON_PADDING}; font-weight: bold; }} "
             f"QPushButton:hover {{ background-color: rgba(255, 0, 0, {CLOSE_BUTTON_HOVER_ALPHA}); }} "
             f"QPushButton:pressed {{ background-color: rgba(255, 0, 0, {CLOSE_BUTTON_PRESSED_ALPHA}); }}"

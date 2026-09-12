@@ -65,6 +65,7 @@ class SettingsStorage:
     def _get_default_settings() -> dict:
         return {
             "startup": False,
+            "theme": "Default",
         }
 
     @staticmethod

@@ -1,5 +1,6 @@
 import sys
 from PyQt5.QtWidgets import QApplication
+from src.settings.theme import ThemeSettings
 from src.task_file_storage import TaskFileStorage
 from src.ui.main_window import MainWindow
 
@@ -8,7 +9,10 @@ def main():
     app = QApplication(sys.argv)
 
     task_file_storage = TaskFileStorage()
-    window = MainWindow(task_file_storage=task_file_storage)
+    window = MainWindow(
+        task_file_storage=task_file_storage,
+        theme=ThemeSettings.load_selected_theme(),
+    )
     window.display()
 
     sys.exit(app.exec_())

@@ -11,7 +11,6 @@ CHECKBOX_LABEL = "Enable"
 SUPPORTED_INFO_LABEL = "Starts JustTodoIt automatically when you sign in to Windows."
 UNSUPPORTED_INFO_LABEL = "Available in the packaged Windows application."
 INFO_LABEL_FONT_SIZE = "9pt"
-INFO_LABEL_TEXT_COLOR = "gray"
 
 
 class Startup(Setting):
@@ -26,9 +25,12 @@ class Startup(Setting):
         return self.startup_service.is_windows()
 
     def add_to_layout(self, layout) -> None:
-        layout.addWidget(QLabel(SECTION_LABEL))
+        section_label = QLabel(SECTION_LABEL)
+        section_label.setStyleSheet(f"color: {self.theme.text_color};")
+        layout.addWidget(section_label)
 
         checkbox = QCheckBox(CHECKBOX_LABEL)
+        checkbox.setStyleSheet(f"color: {self.theme.text_color};")
         checkbox.setChecked(self.settings.get(SETTING_KEY, False))
         checkbox.setEnabled(self.startup_service.is_supported())
         checkbox.stateChanged.connect(self._on_state_changed)
@@ -36,7 +38,7 @@ class Startup(Setting):
 
         info_label = QLabel(self._get_info_label())
         info_label.setStyleSheet(
-            f"color: {INFO_LABEL_TEXT_COLOR}; font-size: {INFO_LABEL_FONT_SIZE};"
+            f"color: {self.theme.text_color}; font-size: {INFO_LABEL_FONT_SIZE};"
         )
         layout.addWidget(info_label)
 

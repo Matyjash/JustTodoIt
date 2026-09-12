@@ -1,58 +1,69 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 
 @dataclass
 class Theme:
-    window_background: str = "#f0f0f0"
+    background_color: str = "#f0f0f0"
+    surface_color: str = "white"
+    text_color: str = "black"
+    lead_color: str = "#4CAF50"
+    accept_color: str = "#4CAF50"
+    decline_color: str = "#f44336"
+    neutral_color: str = "#9e9e9e"
+    border_color: str = "#EBEAEA"
 
     title_font_name: str = "Arial"
     title_font_size: int = 14
-    title_bg_color: str = "#4CAF50"
-    title_text_color: str = "white"
     title_padding: str = "10px"
 
     input_padding: str = "8px"
-    input_border: str = "1px solid #ddd"
     input_border_radius: str = "4px"
 
-    add_btn_bg_color: str = "#4CAF50"
-    add_btn_text_color: str = "white"
     add_btn_padding: str = "8px 15px"
-    add_btn_hover_color: str = "#45a049"
 
-    list_border: str = "1px solid #ddd"
     list_border_radius: str = "4px"
-    list_bg_color: str = "white"
     list_item_padding: str = "10px"
-    list_item_border_bottom: str = "1px solid #eee"
-    list_item_selected_bg: str = "#e8f5e9"
     list_item_font_name: str = "Arial"
     list_item_font_size: int = 10
 
-    delete_btn_bg_color: str = "#f44336"
-    delete_btn_text_color: str = "white"
     delete_btn_padding: str = "8px 15px"
-    delete_btn_hover_color: str = "#da190b"
 
-    clear_btn_bg_color: str = "#ff9800"
-    clear_btn_text_color: str = "white"
     clear_btn_padding: str = "8px 15px"
-    clear_btn_hover_color: str = "#e68900"
 
-    edit_btn_bg_color: str = "#9e9e9e"
-    edit_btn_text_color: str = "white"
     edit_btn_padding: str = "6px 12px"
-    edit_btn_hover_color: str = "#757575"
 
-    save_btn_bg_color: str = "#4CAF50"
-    save_btn_text_color: str = "white"
     save_btn_padding: str = "8px 15px"
-    save_btn_hover_color: str = "#45a049"
 
-    task_status_not_done_color: str = "#BDBDBD"
-    task_status_done_color: str = "#4CAF50"
     task_status_square_size: int = 20
     task_status_square_padding: str = "4px"
 
 
 DEFAULT_THEME = Theme()
+DEFAULT_THEME_NAME = "Default"
+
+BLUE_THEME_NAME = "Blue"
+BLUE_THEME = replace(
+    DEFAULT_THEME,
+    background_color="#E8EAF6",
+    lead_color="#3F51B5",
+    accept_color="#3F51B5",
+)
+
+TIGER_THEME_NAME = "Tiger"
+TIGER_THEME = replace(
+    DEFAULT_THEME,
+    background_color="#000000",
+    surface_color="#1A1A1A",
+    text_color="#F5F5F5",
+    lead_color="#FFA500",
+    accept_color="#FFA500",
+    decline_color="#E65100",
+    neutral_color="#616161",
+    border_color="#424242",
+)
+
+THEMES = {
+    DEFAULT_THEME_NAME: DEFAULT_THEME,
+    BLUE_THEME_NAME: BLUE_THEME,
+    TIGER_THEME_NAME: TIGER_THEME,
+}

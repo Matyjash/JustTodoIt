@@ -45,7 +45,7 @@ class Window(QMainWindow):
         self.setGeometry(window_x, window_y, window_width, window_height)
         self.setWindowFlags(Qt.FramelessWindowHint)
         if self.theme:
-            self.setStyleSheet(f"background-color: {self.theme.window_background};")
+            self.setStyleSheet(f"background-color: {self.theme.background_color};")
 
     def create_title_bar(self, title_text: str) -> QHBoxLayout:
         title_bar_layout = QHBoxLayout()
@@ -63,7 +63,7 @@ class Window(QMainWindow):
                 QFont(self.theme.title_font_name, self.theme.title_font_size, QFont.Bold)
             )
             title.setStyleSheet(
-                f"QPushButton {{ background-color: transparent; color: {self.theme.title_text_color}; "
+                "QPushButton { background-color: transparent; color: white; "
                 f"border: none; padding: {TITLE_BAR_LABEL_PADDING}; text-align: left; }}"
             )
         title.setEnabled(False)
@@ -79,7 +79,7 @@ class Window(QMainWindow):
         minimize_btn.setMaximumWidth(CONTROL_BUTTON_SIZE)
         if self.theme:
             minimize_btn.setStyleSheet(
-                f"QPushButton {{ background-color: transparent; color: {self.theme.title_text_color}; border: none; "
+                "QPushButton { background-color: transparent; color: white; border: none; "
                 f"padding: {TITLE_BAR_BUTTON_PADDING}; font-weight: bold; }} "
                 f"QPushButton:hover {{ background-color: rgba(0, 0, 0, {CONTROL_BUTTON_HOVER_ALPHA}); }} "
                 f"QPushButton:pressed {{ background-color: rgba(0, 0, 0, {CONTROL_BUTTON_PRESSED_ALPHA}); }}"
@@ -93,7 +93,7 @@ class Window(QMainWindow):
         self.maximize_btn.setMaximumWidth(CONTROL_BUTTON_SIZE)
         if self.theme:
             self.maximize_btn.setStyleSheet(
-                f"QPushButton {{ background-color: transparent; color: {self.theme.title_text_color}; border: none; "
+                "QPushButton { background-color: transparent; color: white; border: none; "
                 f"padding: {TITLE_BAR_BUTTON_PADDING}; font-weight: bold; }} "
                 f"QPushButton:hover {{ background-color: rgba(0, 0, 0, {CONTROL_BUTTON_HOVER_ALPHA}); }} "
                 f"QPushButton:pressed {{ background-color: rgba(0, 0, 0, {CONTROL_BUTTON_PRESSED_ALPHA}); }}"
@@ -108,7 +108,7 @@ class Window(QMainWindow):
         close_btn.setMaximumWidth(CONTROL_BUTTON_SIZE)
         if self.theme:
             close_btn.setStyleSheet(
-                f"QPushButton {{ background-color: transparent; color: {self.theme.title_text_color}; border: none; "
+                "QPushButton { background-color: transparent; color: white; border: none; "
                 f"padding: {TITLE_BAR_BUTTON_PADDING}; font-weight: bold; }} "
                 f"QPushButton:hover {{ background-color: rgba(255, 0, 0, {CLOSE_BUTTON_HOVER_ALPHA}); }} "
                 f"QPushButton:pressed {{ background-color: rgba(255, 0, 0, {CLOSE_BUTTON_PRESSED_ALPHA}); }}"
