@@ -2,7 +2,7 @@ from PyQt5.QtCore import QEvent, Qt
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QWidget
 from src.settings.settings_storage import SettingsStorage
-from src.ui.settings.sections.launch_on_boot import LaunchOnBoot
+from src.ui.settings.sections.startup import Startup
 from src.ui.style import DEFAULT_STYLE, Style
 
 
@@ -39,7 +39,7 @@ class SettingsDialog(QDialog):
         self.style = style
         self.settings = SettingsStorage.load_settings()
         self.drag_position = None
-        self.sections = [LaunchOnBoot(self.settings, self.style)]
+        self.sections = [Startup(self.settings, self.style)]
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog)
         self._init_ui()
 

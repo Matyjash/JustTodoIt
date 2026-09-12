@@ -64,7 +64,7 @@ class SettingsStorage:
     @staticmethod
     def _get_default_settings() -> dict:
         return {
-            "launch_on_boot": False,
+            "startup": False,
         }
 
     @staticmethod

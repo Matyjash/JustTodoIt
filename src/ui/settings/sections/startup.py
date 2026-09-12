@@ -1,84 +1,56 @@
-import platform
-import sys
+from PyQt5.QtWidgets import QCheckBox, QLabel
+from src.settings.settings_storage import SettingsStorage
+from src.settings.startup import Startup as StartupService
+from src.ui.settings.sections.setting import Setting
+from src.ui.style import Style
 
 
-WINDOWS_PLATFORM = "Windows"
-MACOS_PLATFORM = "Darwin"
-LINUX_PLATFORM = "Linux"
-REGISTRY_PATH = r"Software\Microsoft\Windows\CurrentVersion\Run"
-REGISTRY_VALUE_NAME = "JustTodoIt"
+SETTING_KEY = "startup"
+SECTION_LABEL = "Launch on system boot:"
+CHECKBOX_LABEL = "Enable"
+SUPPORTED_INFO_LABEL = "Starts JustTodoIt automatically when you sign in to Windows."
+UNSUPPORTED_INFO_LABEL = "Available in the packaged Windows application."
+INFO_LABEL_FONT_SIZE = "9pt"
+INFO_LABEL_TEXT_COLOR = "gray"
 
 
-class StartupManager:
-    """Registers the application to start when the user signs in."""
+class Startup(Setting):
+    """Provides the startup setting when the installed app supports it."""
 
-    def is_windows(self) -> bool:
-        return platform.system() == WINDOWS_PLATFORM
+    def __init__(self, settings: dict, style: Style):
+        self.settings = settings
+        self.style = style
+        self.startup_service = StartupService()
 
-    def is_supported(self) -> bool:
-        return self.is_windows() and getattr(sys, "frozen", False)
+    def is_available(self) -> bool:
+        return self.startup_service.is_windows()
 
-    def enable(self) -> None:
-        system = platform.system()
+    def add_to_layout(self, layout) -> None:
+        layout.addWidget(QLabel(SECTION_LABEL))
 
-        if system == WINDOWS_PLATFORM:
-            self._enable_windows()
-        elif system == MACOS_PLATFORM:
-            self._enable_macos()
-        elif system == LINUX_PLATFORM:
-            self._enable_linux()
+        checkbox = QCheckBox(CHECKBOX_LABEL)
+        checkbox.setChecked(self.settings.get(SETTING_KEY, False))
+        checkbox.setEnabled(self.startup_service.is_supported())
+        checkbox.stateChanged.connect(self._on_state_changed)
+        layout.addWidget(checkbox)
 
-    def disable(self) -> None:
-        system = platform.system()
+        info_label = QLabel(self._get_info_label())
+        info_label.setStyleSheet(
+            f"color: {INFO_LABEL_TEXT_COLOR}; font-size: {INFO_LABEL_FONT_SIZE};"
+        )
+        layout.addWidget(info_label)
 
-        if system == WINDOWS_PLATFORM:
-            self._disable_windows()
-        elif system == MACOS_PLATFORM:
-            self._disable_macos()
-        elif system == LINUX_PLATFORM:
-            self._disable_linux()
+    def _on_state_changed(self, state: int) -> None:
+        is_enabled = bool(state)
+        self.settings[SETTING_KEY] = is_enabled
+        SettingsStorage.save_settings(self.settings)
 
-    def _enable_windows(self) -> None:
-        """Adds the packaged executable to the current user's startup registry key."""
-        import winreg
+        if is_enabled:
+            self.startup_service.enable()
+        else:
+            self.startup_service.disable()
 
-        try:
-            executable_path = f'"{sys.executable}"'
-            with winreg.OpenKey(
-                winreg.HKEY_CURRENT_USER,
-                REGISTRY_PATH,
-                0,
-                winreg.KEY_SET_VALUE,
-            ) as key:
-                winreg.SetValueEx(
-                    key, REGISTRY_VALUE_NAME, 0, winreg.REG_SZ, executable_path
-                )
-        except OSError as error:
-            print(f"Error enabling boot startup: {error}")
-
-    def _disable_windows(self) -> None:
-        """Removes the application from the current user's startup registry key."""
-        import winreg
-
-        try:
-            with winreg.OpenKey(
-                winreg.HKEY_CURRENT_USER,
-                REGISTRY_PATH,
-                0,
-                winreg.KEY_SET_VALUE,
-            ) as key:
-                winreg.DeleteValue(key, REGISTRY_VALUE_NAME)
-        except OSError as error:
-            print(f"Error disabling boot startup: {error}")
-
-    def _enable_macos(self) -> None:
-        print("macOS boot startup not yet implemented")
-
-    def _disable_macos(self) -> None:
-        print("macOS boot startup not yet implemented")
-
-    def _enable_linux(self) -> None:
-        print("Linux boot startup not yet implemented")
-
-    def _disable_linux(self) -> None:
-        print("Linux boot startup not yet implemented")
+    def _get_info_label(self) -> str:
+        if self.startup_service.is_supported():
+            return SUPPORTED_INFO_LABEL
+        return UNSUPPORTED_INFO_LABEL
