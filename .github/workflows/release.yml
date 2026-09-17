@@ -68,6 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+      REPOSITORY: ${{ github.repository }}
 
     steps:
       - name: Download executables
@@ -80,10 +81,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          if ! gh release view "$RELEASE_TAG" > /dev/null 2>&1; then
-            gh release create "$RELEASE_TAG" --generate-notes --title "$RELEASE_TAG"
+          if ! gh release view "$RELEASE_TAG" --repo "$REPOSITORY" > /dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --repo "$REPOSITORY" --generate-notes --title "$RELEASE_TAG"
           fi
-          gh release upload "$RELEASE_TAG" \
+          gh release upload "$RELEASE_TAG" --repo "$REPOSITORY" \
             release-assets/JustTodoIt-windows/JustTodoIt.exe \
             release-assets/JustTodoIt-ubuntu/JustTodoIt \
             --clobber
