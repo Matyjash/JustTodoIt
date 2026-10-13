@@ -22,11 +22,6 @@ class TaskFileStorage:
         return get_data_file_path(TaskFileStorage.FILENAME)
 
     @staticmethod
-    def _normalize_task_orders(tasks: List[Task]) -> None:
-        for index, task in enumerate(tasks):
-            task.order = index
-
-    @staticmethod
     def load_tasks() -> List[Task]:
         file_path = TaskFileStorage.get_file_path()
 
@@ -52,7 +47,6 @@ class TaskFileStorage:
                         order=order,
                     )
                     tasks.append(task)
-                TaskFileStorage._normalize_task_orders(tasks)
                 return tasks
         except (json.JSONDecodeError, KeyError, IOError):
             return []
@@ -60,8 +54,6 @@ class TaskFileStorage:
     @staticmethod
     def save_tasks(tasks: List[Task]) -> None:
         file_path = TaskFileStorage.get_file_path()
-
-        TaskFileStorage._normalize_task_orders(tasks)
 
         data = [
             {

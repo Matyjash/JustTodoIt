@@ -14,8 +14,8 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt, QEvent, QSize
 from PyQt5.QtGui import QFont
-from typing import Optional
 from src.task import Task
+from src.task_manager import TaskManager
 from src.ui.theme.theme import DEFAULT_THEME, Theme
 from src.ui.edit_task_window import EditTaskDialog
 from src.ui.settings.settings_dialog import SettingsDialog
@@ -143,17 +143,9 @@ class DraggableTaskRow(QWidget):
 class MainWindow(ResizableWindow):
     """Main window for the todo application."""
 
-    def __init__(self, task_file_storage, theme: Theme = DEFAULT_THEME):
-        """
-        Initialize the MainWindow.
-
-        Args:
-            task_file_storage: TaskFileStorage instance for persisting tasks
-            theme: Theme configuration for the window (default: DEFAULT_THEME)
-        """
+    def __init__(self, task_manager: TaskManager, theme: Theme = DEFAULT_THEME):
         super().__init__(theme)
-        self.task_file_storage = task_file_storage
-        self.tasks = task_file_storage.load_tasks()
+        self.task_manager = task_manager
         self.init_ui()
 
     def init_ui(
@@ -208,7 +200,7 @@ class MainWindow(ResizableWindow):
         self._init_input_layout()
         self._init_todo_list()
         self._init_button_layout()
-        self.load_tasks()
+        self._render_tasks()
 
         top_layout.addLayout(self.main_layout)
         central_widget.setLayout(top_layout)
@@ -269,7 +261,7 @@ class MainWindow(ResizableWindow):
         button_layout.addWidget(clear_button)
         self.main_layout.addLayout(button_layout)
 
-    def _add_task_to_list(self, task: Task, task_index: int) -> None:
+    def _add_task_to_list(self, task: Task) -> None:
         item = QListWidgetItem()
         item.setData(Qt.UserRole, task)
         item.setFont(
@@ -292,7 +284,7 @@ class MainWindow(ResizableWindow):
             f"QPushButton:hover {{ opacity: 0.8; }}"
         )
         status_square.clicked.connect(
-            lambda checked, idx=task_index: self._toggle_task(idx)
+            lambda checked, task=task: self._toggle_task(task)
         )
         item_widget.add_drag_source(status_square)
         item_layout.addWidget(status_square)
@@ -312,7 +304,7 @@ class MainWindow(ResizableWindow):
             f"padding: {self.theme.edit_btn_padding}; border: none; border-radius: 4px; }}"
         )
         edit_button.clicked.connect(
-            lambda checked, idx=task_index: self.open_edit_dialog(idx)
+            lambda checked, task=task: self.open_edit_dialog(task)
         )
         item_widget.add_drag_source(edit_button)
         item_layout.addWidget(edit_button)
@@ -321,36 +313,22 @@ class MainWindow(ResizableWindow):
         item.setSizeHint(QSize(0, TASK_ROW_HEIGHT))
         self.todo_list.setItemWidget(item, item_widget)
 
-    def load_tasks(self) -> None:
-        """
-        Load and display all tasks from storage.
-        """
-        self.tasks = sorted(self.tasks, key=lambda task: task.order)
+    def _render_tasks(self) -> None:
         self.todo_list.clear()
-        for index, task in enumerate(self.tasks):
-            self._add_task_to_list(task, index)
+        for task in self.task_manager.tasks:
+            self._add_task_to_list(task)
 
     def add_todo(self) -> None:
         """
         Add a new task from the input field.
         """
-        text = self.input_field.text().strip()
-        if not text:
+        task = self.task_manager.add(self.input_field.text())
+        if task is None:
             return
-
-        task = Task(text=text, done=False, order=len(self.tasks))
-        self.tasks.append(task)
-
-        task_index = len(self.tasks) - 1
-        self.task_file_storage.save_tasks(self.tasks)
-        self._add_task_to_list(task, task_index)
+        self._add_task_to_list(task)
         self.input_field.clear()
 
-    def open_edit_dialog(self, task_index: int) -> None:
-        if task_index < 0 or task_index >= len(self.tasks):
-            return
-
-        task = self.tasks[task_index]
+    def open_edit_dialog(self, task: Task) -> None:
         main_geometry = self.frameGeometry()
         start_reference_position = (
             main_geometry.x(),
@@ -363,9 +341,8 @@ class MainWindow(ResizableWindow):
         result = edit_dialog.exec_()
 
         if result == QDialog.Accepted and edit_dialog.new_text:
-            task.text = edit_dialog.new_text
-            self.task_file_storage.save_tasks(self.tasks)
-            self.load_tasks()
+            if self.task_manager.rename(task, edit_dialog.new_text):
+                self._render_tasks()
 
     def delete_todo(self) -> None:
         """
@@ -376,18 +353,12 @@ class MainWindow(ResizableWindow):
             return
 
         selected_tasks = [item.data(Qt.UserRole) for item in selected_items]
-        for task in selected_tasks:
-            if task in self.tasks:
-                self.tasks.remove(task)
-
-        self._normalize_task_orders()
-        self.task_file_storage.save_tasks(self.tasks)
-        self.load_tasks()
+        if self.task_manager.remove(selected_tasks):
+            self._render_tasks()
 
     def clear_all(self) -> None:
-        self.tasks.clear()
-        self.todo_list.clear()
-        self.task_file_storage.save_tasks(self.tasks)
+        self.task_manager.clear()
+        self._render_tasks()
 
     def open_settings(self) -> None:
         """
@@ -401,46 +372,13 @@ class MainWindow(ResizableWindow):
         self.theme = theme
         self.init_ui(restore_geometry=False, initialize_window=False)
 
-    def _normalize_task_orders(self) -> None:
-        for index, task in enumerate(self.tasks):
-            task.order = index
-
-    def _sync_tasks_from_list(self) -> None:
-        reordered_tasks = []
-        for row in range(self.todo_list.count()):
-            item = self.todo_list.item(row)
-            task = item.data(Qt.UserRole)
-            if task is not None:
-                reordered_tasks.append(task)
-
-        self.tasks = reordered_tasks
-        self._normalize_task_orders()
-        self.task_file_storage.save_tasks(self.tasks)
-        self.load_tasks()
-
     def _move_task_in_list(self, from_row: int, to_row: int) -> None:
-        if from_row < 0 or from_row >= len(self.tasks):
-            return
+        if self.task_manager.move(from_row, to_row):
+            self._render_tasks()
 
-        task = self.tasks.pop(from_row)
-        if to_row < 0:
-            to_row = 0
-        if to_row > len(self.tasks):
-            to_row = len(self.tasks)
-        if to_row > from_row:
-            to_row = max(0, to_row - 1)
-        self.tasks.insert(to_row, task)
-
-        self._normalize_task_orders()
-        self.task_file_storage.save_tasks(self.tasks)
-        self.load_tasks()
-
-    def _toggle_task(self, task_index: int) -> None:
-        if task_index < 0 or task_index >= len(self.tasks):
-            return
-        self.tasks[task_index].toggle()
-        self.task_file_storage.save_tasks(self.tasks)
-        self.load_tasks()
+    def _toggle_task(self, task: Task) -> None:
+        if self.task_manager.toggle(task):
+            self._render_tasks()
 
     def display(self) -> None:
         self.show()
