@@ -20,6 +20,7 @@ from src.ui.theme.theme import DEFAULT_THEME, Theme
 from src.ui.edit_task_window import EditTaskDialog
 from src.ui.settings.settings_dialog import SettingsDialog
 from src.ui.resizable_window import ResizableWindow
+from src.ui.icons import create_icon
 
 WINDOW_TITLE = "Todo App"
 WINDOW_X = 100
@@ -172,8 +173,11 @@ class MainWindow(ResizableWindow):
 
         title_bar_layout = self.create_title_bar(TITLE_TEXT)
 
-        #TODO: Replace with settings icon
-        settings_button = QPushButton("⚙")
+        settings_button = QPushButton()
+        settings_button.setIcon(create_icon("settings", self.theme.text_color))
+        settings_button.setIconSize(QSize(20, 20))
+        settings_button.setToolTip("Settings")
+        settings_button.setAccessibleName("Settings")
         settings_button.setMaximumWidth(35)
         settings_button.setStyleSheet(
             "QPushButton { background-color: transparent; color: white; "
@@ -297,8 +301,13 @@ class MainWindow(ResizableWindow):
         item_widget.add_drag_source(task_label)
         item_layout.addWidget(task_label)
 
-        edit_button = QPushButton("E")
-        edit_button.setMaximumWidth(30)
+        edit_button = QPushButton()
+        edit_button.setFixedSize(30, 30)
+        edit_button.setFixedSize(30, 30)
+        edit_button.setIcon(create_icon("edit", self.theme.text_color))
+        edit_button.setIconSize(QSize(18, 18))
+        edit_button.setToolTip("Edit task")
+        edit_button.setAccessibleName("Edit task")
         edit_button.setStyleSheet(
             f"QPushButton {{ background-color: {self.theme.neutral_color}; color: white; "
             f"padding: {self.theme.edit_btn_padding}; border: none; border-radius: 4px; }}"

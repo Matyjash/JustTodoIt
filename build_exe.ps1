@@ -12,7 +12,7 @@ if (-not $pyinstaller) {
 
 Write-Host "Building JustTodoIt executable..." -ForegroundColor Cyan
 
-$buildCmd = "pyinstaller --onefile --windowed --name=JustTodoIt app.py"
+$buildCmd = "pyinstaller --onefile --windowed --name=JustTodoIt --add-data='data;data' app.py"
 
 if ($WithIcon -and (Test-Path "icon.ico")) {
     $buildCmd += " --icon=icon.ico"

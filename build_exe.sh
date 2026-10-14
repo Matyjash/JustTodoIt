@@ -22,7 +22,7 @@ fi
 
 echo "Building JustTodoIt executable..."
 
-BUILD_CMD="pyinstaller --onefile --windowed --name=JustTodoIt app.py"
+BUILD_CMD="pyinstaller --onefile --windowed --name=JustTodoIt --add-data='data:data' app.py"
 
 if [ "$WITH_ICON" = true ] && [ -f "icon.ico" ]; then
     BUILD_CMD="$BUILD_CMD --icon=icon.ico"

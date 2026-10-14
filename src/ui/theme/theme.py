@@ -30,7 +30,7 @@ class Theme:
 
     clear_btn_padding: str = "8px 15px"
 
-    edit_btn_padding: str = "6px 12px"
+    edit_btn_padding: str = "6px"
 
     save_btn_padding: str = "8px 15px"
 
