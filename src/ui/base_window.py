@@ -1,24 +1,6 @@
-from PyQt5.QtWidgets import QMainWindow, QHBoxLayout, QPushButton
+from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtCore import Qt, QEvent, QSettings
-from PyQt5.QtGui import QFont
-
-TITLE_BAR_HEIGHT = 30
-CONTROL_BUTTON_SIZE = 24
-
-TITLE_BAR_MARGIN_LEFT = 10
-TITLE_BAR_MARGIN_TOP = 5
-TITLE_BAR_MARGIN_RIGHT = 5
-TITLE_BAR_MARGIN_BOTTOM = 5
-TITLE_BAR_SPACING = 5
-TITLE_BAR_BUTTON_PADDING = "4px"
-TITLE_BAR_LABEL_PADDING = "5px"
-
-DRAG_THRESHOLD_Y = 50
-
-CONTROL_BUTTON_HOVER_ALPHA = 0.2
-CONTROL_BUTTON_PRESSED_ALPHA = 0.3
-CLOSE_BUTTON_HOVER_ALPHA = 0.3
-CLOSE_BUTTON_PRESSED_ALPHA = 0.5
+from src.ui.components.window_drag import WindowDrag
 
 
 class Window(QMainWindow):
@@ -33,7 +15,7 @@ class Window(QMainWindow):
         """
         super().__init__()
         self.theme = theme
-        self.drag_position = None
+        self.window_drag = WindowDrag(self)
         self.mouse_press_x: int = 0
         self.mouse_press_y: int = 0
         self.is_maximized: bool = False
@@ -47,92 +29,14 @@ class Window(QMainWindow):
         if self.theme:
             self.setStyleSheet(f"background-color: {self.theme.background_color};")
 
-    def create_title_bar(self, title_text: str) -> QHBoxLayout:
-        title_bar_layout = QHBoxLayout()
-        title_bar_layout.setContentsMargins(
-            TITLE_BAR_MARGIN_LEFT,
-            TITLE_BAR_MARGIN_TOP,
-            TITLE_BAR_MARGIN_RIGHT,
-            TITLE_BAR_MARGIN_BOTTOM,
-        )
-        title_bar_layout.setSpacing(TITLE_BAR_SPACING)
-
-        title = QPushButton(title_text)
-        if self.theme:
-            title.setFont(
-                QFont(self.theme.title_font_name, self.theme.title_font_size, QFont.Bold)
-            )
-            title.setStyleSheet(
-                "QPushButton { background-color: transparent; color: white; "
-                f"border: none; padding: {TITLE_BAR_LABEL_PADDING}; text-align: left; }}"
-            )
-        title.setEnabled(False)
-        title_bar_layout.addWidget(title)
-
-        title_bar_layout.addStretch()
-
-        return title_bar_layout
-
-    def add_minimize_button(self, title_bar_layout: QHBoxLayout) -> None:
-        """Add minimize button to title bar."""
-        minimize_btn = QPushButton("_")
-        minimize_btn.setMaximumWidth(CONTROL_BUTTON_SIZE)
-        if self.theme:
-            minimize_btn.setStyleSheet(
-                "QPushButton { background-color: transparent; color: white; border: none; "
-                f"padding: {TITLE_BAR_BUTTON_PADDING}; font-weight: bold; }} "
-                f"QPushButton:hover {{ background-color: rgba(0, 0, 0, {CONTROL_BUTTON_HOVER_ALPHA}); }} "
-                f"QPushButton:pressed {{ background-color: rgba(0, 0, 0, {CONTROL_BUTTON_PRESSED_ALPHA}); }}"
-            )
-        minimize_btn.clicked.connect(self.minimize_window)
-        title_bar_layout.addWidget(minimize_btn)
-
-    def add_maximize_button(self, title_bar_layout: QHBoxLayout) -> QPushButton:
-        """Add maximize button to title bar."""
-        self.maximize_btn = QPushButton("□")
-        self.maximize_btn.setMaximumWidth(CONTROL_BUTTON_SIZE)
-        if self.theme:
-            self.maximize_btn.setStyleSheet(
-                "QPushButton { background-color: transparent; color: white; border: none; "
-                f"padding: {TITLE_BAR_BUTTON_PADDING}; font-weight: bold; }} "
-                f"QPushButton:hover {{ background-color: rgba(0, 0, 0, {CONTROL_BUTTON_HOVER_ALPHA}); }} "
-                f"QPushButton:pressed {{ background-color: rgba(0, 0, 0, {CONTROL_BUTTON_PRESSED_ALPHA}); }}"
-            )
-        self.maximize_btn.clicked.connect(self.toggle_maximize)
-        title_bar_layout.addWidget(self.maximize_btn)
-        return self.maximize_btn
-
-    def add_close_button(self, title_bar_layout: QHBoxLayout) -> None:
-        """Add close button to title bar."""
-        close_btn = QPushButton("✕")
-        close_btn.setMaximumWidth(CONTROL_BUTTON_SIZE)
-        if self.theme:
-            close_btn.setStyleSheet(
-                "QPushButton { background-color: transparent; color: white; border: none; "
-                f"padding: {TITLE_BAR_BUTTON_PADDING}; font-weight: bold; }} "
-                f"QPushButton:hover {{ background-color: rgba(255, 0, 0, {CLOSE_BUTTON_HOVER_ALPHA}); }} "
-                f"QPushButton:pressed {{ background-color: rgba(255, 0, 0, {CLOSE_BUTTON_PRESSED_ALPHA}); }}"
-            )
-        close_btn.clicked.connect(self.close_window)
-        title_bar_layout.addWidget(close_btn)
-
     def mousePressEvent(self, event: QEvent) -> None:
-        """Handle mouse press for window dragging."""
-        if event.button() == Qt.LeftButton:
-            self.drag_position = event.globalPos() - self.frameGeometry().topLeft()
-            self.mouse_press_x = event.x()
-            self.mouse_press_y = event.y()
+        self.window_drag.press(event)
 
     def mouseMoveEvent(self, event: QEvent) -> None:
-        """Handle mouse move for window dragging from title bar."""
-        if event.buttons() == Qt.LeftButton and self.drag_position is not None:
-            if event.y() < DRAG_THRESHOLD_Y:
-                self.move(event.globalPos() - self.drag_position)
+        self.window_drag.move(event)
 
     def mouseReleaseEvent(self, event: QEvent) -> None:
-        """Handle mouse release."""
-        if event.button() == Qt.LeftButton:
-            self.drag_position = None
+        self.window_drag.release(event)
 
     def minimize_window(self) -> None:
         """Minimize the window."""

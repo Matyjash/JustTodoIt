@@ -21,6 +21,7 @@ from src.ui.edit_task_window import EditTaskDialog
 from src.ui.settings.settings_dialog import SettingsDialog
 from src.ui.resizable_window import ResizableWindow
 from src.ui.icons import create_icon
+from src.ui.components.title_bar import TitleBar
 
 WINDOW_TITLE = "Todo App"
 WINDOW_X = 100
@@ -166,12 +167,7 @@ class MainWindow(ResizableWindow):
         top_layout.setContentsMargins(0, 0, 0, 0)
         top_layout.setSpacing(0)
 
-        title_bar_widget = QWidget()
-        title_bar_widget.setStyleSheet(
-            f"background-color: {self.theme.lead_color};"
-        )
-
-        title_bar_layout = self.create_title_bar(TITLE_TEXT)
+        title_bar = TitleBar(TITLE_TEXT, self.theme)
 
         settings_button = QPushButton()
         settings_button.setIcon(create_icon("settings", self.theme.text_color))
@@ -186,14 +182,12 @@ class MainWindow(ResizableWindow):
             f"QPushButton:pressed {{ background-color: rgba(255, 255, 255, {CONTROL_BUTTON_PRESSED_ALPHA}); }}"
         )
         settings_button.clicked.connect(self.open_settings)
-        title_bar_layout.addWidget(settings_button)
+        title_bar.add_widget(settings_button)
 
-        self.add_minimize_button(title_bar_layout)
-        self.add_maximize_button(title_bar_layout)
-        self.add_close_button(title_bar_layout)
-
-        title_bar_widget.setLayout(title_bar_layout)
-        top_layout.addWidget(title_bar_widget)
+        title_bar.add_control_button("_", self.minimize_window)
+        self.maximize_btn = title_bar.add_control_button("□", self.toggle_maximize)
+        title_bar.add_close_button(self.close_window)
+        top_layout.addWidget(title_bar)
 
         self.main_layout = QVBoxLayout()
         self.main_layout.setContentsMargins(

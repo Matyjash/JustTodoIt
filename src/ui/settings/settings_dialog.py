@@ -1,6 +1,7 @@
-from PyQt5.QtCore import QEvent, Qt
-from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QWidget
+from PyQt5.QtCore import Qt
+from src.ui.components.title_bar import TitleBar
+from src.ui.components.window_drag import DraggableDialog
+from PyQt5.QtWidgets import QHBoxLayout, QPushButton, QVBoxLayout
 from src.settings.settings_storage import SettingsStorage
 from src.ui.settings.sections.startup import Startup
 from src.ui.settings.sections.theme import Theme as ThemeSection
@@ -12,34 +13,18 @@ WINDOW_HEIGHT = 250
 DEFAULT_WINDOW_POSITION = 100
 
 SETTINGS_TITLE = "Settings"
-CLOSE_BUTTON_TEXT = "\u2715"
 CLOSE_DIALOG_BUTTON_TEXT = "Close"
-CONTROL_BUTTON_SIZE = 24
-
-TITLE_BAR_MARGIN_LEFT = 10
-TITLE_BAR_MARGIN_TOP = 5
-TITLE_BAR_MARGIN_RIGHT = 5
-TITLE_BAR_MARGIN_BOTTOM = 5
-TITLE_BAR_SPACING = 5
-TITLE_BAR_BUTTON_PADDING = "4px"
-TITLE_BAR_LABEL_PADDING = "5px"
-
 CONTENT_MARGIN = 10
 CONTENT_SPACING = 10
-TITLE_BAR_DRAG_HEIGHT = 40
-
-CLOSE_BUTTON_HOVER_ALPHA = 0.3
-CLOSE_BUTTON_PRESSED_ALPHA = 0.5
 
 
-class SettingsDialog(QDialog):
+class SettingsDialog(DraggableDialog):
     """Displays and coordinates the available settings sections."""
 
     def __init__(self, parent=None, theme: Theme = DEFAULT_THEME):
-        super().__init__(parent)
+        super().__init__(parent, drag_threshold_y=40)
         self.theme = theme
         self.settings = SettingsStorage.load_settings()
-        self.drag_position = None
         self.sections = [
             ThemeSection(self.settings, self.theme, self._apply_theme),
             Startup(self.settings, self.theme),
@@ -55,7 +40,9 @@ class SettingsDialog(QDialog):
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
-        main_layout.addLayout(self._create_title_bar())
+        title_bar = TitleBar(SETTINGS_TITLE, self.theme)
+        title_bar.add_close_button(self.accept)
+        main_layout.addWidget(title_bar)
         main_layout.addLayout(self._create_content_layout())
         self.setLayout(main_layout)
 
@@ -91,54 +78,6 @@ class SettingsDialog(QDialog):
             parent.set_theme(theme)
         self.accept()
 
-    def _create_title_bar(self) -> QHBoxLayout:
-        title_bar_widget = QWidget()
-        title_bar_widget.setStyleSheet(
-            f"background-color: {self.theme.lead_color};"
-        )
-
-        title_bar_layout = QHBoxLayout()
-        title_bar_layout.setContentsMargins(
-            TITLE_BAR_MARGIN_LEFT,
-            TITLE_BAR_MARGIN_TOP,
-            TITLE_BAR_MARGIN_RIGHT,
-            TITLE_BAR_MARGIN_BOTTOM,
-        )
-        title_bar_layout.setSpacing(TITLE_BAR_SPACING)
-        title_bar_layout.addWidget(self._create_title_label())
-        title_bar_layout.addStretch()
-        title_bar_layout.addWidget(self._create_close_button())
-        title_bar_widget.setLayout(title_bar_layout)
-
-        title_bar_container = QHBoxLayout()
-        title_bar_container.setContentsMargins(0, 0, 0, 0)
-        title_bar_container.addWidget(title_bar_widget)
-        return title_bar_container
-
-    def _create_title_label(self) -> QPushButton:
-        title = QPushButton(SETTINGS_TITLE)
-        title.setFont(
-            QFont(self.theme.title_font_name, self.theme.title_font_size, QFont.Bold)
-        )
-        title.setStyleSheet(
-            "QPushButton { background-color: transparent; color: white; "
-            f"border: none; padding: {TITLE_BAR_LABEL_PADDING}; text-align: left; }}"
-        )
-        title.setEnabled(False)
-        return title
-
-    def _create_close_button(self) -> QPushButton:
-        close_button = QPushButton(CLOSE_BUTTON_TEXT)
-        close_button.setMaximumWidth(CONTROL_BUTTON_SIZE)
-        close_button.setStyleSheet(
-            "QPushButton { background-color: transparent; color: white; border: none; "
-            f"padding: {TITLE_BAR_BUTTON_PADDING}; font-weight: bold; }} "
-            f"QPushButton:hover {{ background-color: rgba(255, 0, 0, {CLOSE_BUTTON_HOVER_ALPHA}); }} "
-            f"QPushButton:pressed {{ background-color: rgba(255, 0, 0, {CLOSE_BUTTON_PRESSED_ALPHA}); }}"
-        )
-        close_button.clicked.connect(self.accept)
-        return close_button
-
     def _create_close_button_layout(self) -> QHBoxLayout:
         button_layout = QHBoxLayout()
         close_button = QPushButton(CLOSE_DIALOG_BUTTON_TEXT)
@@ -150,16 +89,3 @@ class SettingsDialog(QDialog):
         button_layout.addStretch()
         button_layout.addWidget(close_button)
         return button_layout
-
-    def mousePressEvent(self, event: QEvent) -> None:
-        if event.button() == Qt.LeftButton:
-            self.drag_position = event.globalPos() - self.frameGeometry().topLeft()
-
-    def mouseMoveEvent(self, event: QEvent) -> None:
-        if event.buttons() == Qt.LeftButton and self.drag_position is not None:
-            if event.y() < TITLE_BAR_DRAG_HEIGHT:
-                self.move(event.globalPos() - self.drag_position)
-
-    def mouseReleaseEvent(self, event: QEvent) -> None:
-        if event.button() == Qt.LeftButton:
-            self.drag_position = None
