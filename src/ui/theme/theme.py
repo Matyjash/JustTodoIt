@@ -6,6 +6,7 @@ class Theme:
     background_color: str = "#f0f0f0"
     surface_color: str = "white"
     text_color: str = "black"
+    button_text_color: str = "white"
     lead_color: str = "#4CAF50"
     accept_color: str = "#4CAF50"
     decline_color: str = "#f44336"

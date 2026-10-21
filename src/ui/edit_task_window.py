@@ -85,7 +85,7 @@ class EditTaskDialog(DraggableDialog):
 
         save_button = QPushButton("Save")
         save_button.setStyleSheet(
-            f"QPushButton {{ background-color: {self.theme.accept_color}; color: white; "
+            f"QPushButton {{ background-color: {self.theme.accept_color}; color: {self.theme.button_text_color}; "
             f"padding: {self.theme.save_btn_padding}; border: none; border-radius: 4px; }}"
         )
         save_button.clicked.connect(self.save_task)

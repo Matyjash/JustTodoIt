@@ -21,7 +21,7 @@ class TitleBar(QWidget):
         if theme:
             label.setFont(QFont(theme.title_font_name, theme.title_font_size, QFont.Bold))
             label.setStyleSheet(
-                "QPushButton { background-color: transparent; color: white; "
+                f"QPushButton {{ background-color: transparent; color: {self.theme.button_text_color}; "
                 "border: none; padding: 5px; text-align: left; }"
             )
         label.setEnabled(False)
@@ -41,7 +41,7 @@ class TitleBar(QWidget):
             color = "255, 0, 0" if close else "0, 0, 0"
             hover_alpha, pressed_alpha = (0.3, 0.5) if close else (0.2, 0.3)
             button.setStyleSheet(
-                "QPushButton { background-color: transparent; color: white; border: none; "
+                f"QPushButton {{ background-color: transparent; color: {self.theme.button_text_color}; border: none; "
                 "padding: 4px; font-weight: bold; } "
                 f"QPushButton:hover {{ background-color: rgba({color}, {hover_alpha}); }} "
                 f"QPushButton:pressed {{ background-color: rgba({color}, {pressed_alpha}); }}"

@@ -82,7 +82,7 @@ class SettingsDialog(DraggableDialog):
         button_layout = QHBoxLayout()
         close_button = QPushButton(CLOSE_DIALOG_BUTTON_TEXT)
         close_button.setStyleSheet(
-            f"QPushButton {{ background-color: {self.theme.lead_color}; color: white; "
+            f"QPushButton {{ background-color: {self.theme.lead_color}; color: {self.theme.button_text_color}; "
             f"padding: {self.theme.clear_btn_padding}; border: none; border-radius: 4px; }}"
         )
         close_button.clicked.connect(self.accept)

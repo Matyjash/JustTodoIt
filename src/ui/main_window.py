@@ -170,13 +170,13 @@ class MainWindow(ResizableWindow):
         title_bar = TitleBar(TITLE_TEXT, self.theme)
 
         settings_button = QPushButton()
-        settings_button.setIcon(create_icon("settings", self.theme.text_color))
+        settings_button.setIcon(create_icon("settings", self.theme.button_text_color))
         settings_button.setIconSize(QSize(20, 20))
         settings_button.setToolTip("Settings")
         settings_button.setAccessibleName("Settings")
         settings_button.setMaximumWidth(35)
         settings_button.setStyleSheet(
-            "QPushButton { background-color: transparent; color: white; "
+            f"QPushButton {{ background-color: transparent; color: {self.theme.button_text_color}; "
             f"border: none; font-size: 16px; padding: 0px; }}"
             f"QPushButton:hover {{ background-color: rgba(255, 255, 255, {CONTROL_BUTTON_HOVER_ALPHA}); }}"
             f"QPushButton:pressed {{ background-color: rgba(255, 255, 255, {CONTROL_BUTTON_PRESSED_ALPHA}); }}"
@@ -219,7 +219,7 @@ class MainWindow(ResizableWindow):
 
         add_button = QPushButton(ADD_BUTTON_TEXT)
         add_button.setStyleSheet(
-            f"QPushButton {{ background-color: {self.theme.accept_color}; color: white; "
+            f"QPushButton {{ background-color: {self.theme.accept_color}; color: {self.theme.button_text_color}; "
             f"padding: {self.theme.add_btn_padding}; border: none; border-radius: 4px; }}"
         )
         add_button.clicked.connect(self.add_todo)
@@ -243,14 +243,14 @@ class MainWindow(ResizableWindow):
 
         delete_button = QPushButton(DELETE_BUTTON_TEXT)
         delete_button.setStyleSheet(
-            f"QPushButton {{ background-color: {self.theme.decline_color}; color: white; "
+            f"QPushButton {{ background-color: {self.theme.decline_color}; color: {self.theme.button_text_color}; "
             f"padding: {self.theme.delete_btn_padding}; border: none; border-radius: 4px; }}"
         )
         delete_button.clicked.connect(self.delete_todo)
 
         clear_button = QPushButton(CLEAR_BUTTON_TEXT)
         clear_button.setStyleSheet(
-            f"QPushButton {{ background-color: {self.theme.lead_color}; color: white; "
+            f"QPushButton {{ background-color: {self.theme.lead_color}; color: {self.theme.button_text_color}; "
             f"padding: {self.theme.clear_btn_padding}; border: none; border-radius: 4px; }}"
         )
         clear_button.clicked.connect(self.clear_all)
@@ -298,12 +298,12 @@ class MainWindow(ResizableWindow):
         edit_button = QPushButton()
         edit_button.setFixedSize(30, 30)
         edit_button.setFixedSize(30, 30)
-        edit_button.setIcon(create_icon("edit", self.theme.text_color))
+        edit_button.setIcon(create_icon("edit", self.theme.button_text_color))
         edit_button.setIconSize(QSize(18, 18))
         edit_button.setToolTip("Edit task")
         edit_button.setAccessibleName("Edit task")
         edit_button.setStyleSheet(
-            f"QPushButton {{ background-color: {self.theme.neutral_color}; color: white; "
+            f"QPushButton {{ background-color: {self.theme.neutral_color}; color: {self.theme.button_text_color}; "
             f"padding: {self.theme.edit_btn_padding}; border: none; border-radius: 4px; }}"
         )
         edit_button.clicked.connect(
