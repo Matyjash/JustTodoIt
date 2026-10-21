@@ -25,6 +25,7 @@ class TitleBar(QWidget):
                 "border: none; padding: 5px; text-align: left; }"
             )
         label.setEnabled(False)
+        label.setAttribute(Qt.WA_TransparentForMouseEvents, True)
         layout.addWidget(label)
         layout.addStretch()
 
