@@ -31,12 +31,12 @@ WINDOW_HEIGHT = 600
 WINDOW_MARGIN = 10
 WINDOW_SPACING = 10
 TASK_ROW_HEIGHT = 36
+ICON_BUTTON_SIZE = 30
 
 TITLE_TEXT = "Just ToDo It"
 INPUT_PLACEHOLDER = "Add a new task..."
 ADD_BUTTON_TEXT = "Add"
 DELETE_BUTTON_TEXT = "Delete Selected"
-CLEAR_BUTTON_TEXT = "Clear All"
 
 MINIMIZE_BUTTON_TEXT = "_"
 MAXIMIZE_BUTTON_TEXT = "□"
@@ -239,25 +239,37 @@ class MainWindow(ResizableWindow):
         self.main_layout.addWidget(self.todo_list)
 
     def _init_button_layout(self) -> None:
-        button_layout = QHBoxLayout()
+        button_panel = QWidget()
+        button_layout = QHBoxLayout(button_panel)
+        button_layout.setContentsMargins(0, 0, 0, 0)
 
-        delete_button = QPushButton(DELETE_BUTTON_TEXT)
-        delete_button.setStyleSheet(
+        self.delete_button = QPushButton(DELETE_BUTTON_TEXT)
+        self.delete_button.setStyleSheet(
             f"QPushButton {{ background-color: {self.theme.decline_color}; color: {self.theme.button_text_color}; "
             f"padding: {self.theme.delete_btn_padding}; border: none; border-radius: 4px; }}"
         )
-        delete_button.clicked.connect(self.delete_todo)
-
-        clear_button = QPushButton(CLEAR_BUTTON_TEXT)
-        clear_button.setStyleSheet(
-            f"QPushButton {{ background-color: {self.theme.lead_color}; color: {self.theme.button_text_color}; "
-            f"padding: {self.theme.clear_btn_padding}; border: none; border-radius: 4px; }}"
+        button_panel.setFixedHeight(max(ICON_BUTTON_SIZE, self.delete_button.sizeHint().height()))
+        self.delete_button.setText("")
+        self.delete_button.setFixedSize(ICON_BUTTON_SIZE, ICON_BUTTON_SIZE)
+        self.delete_button.setIcon(create_icon("delete", self.theme.button_text_color))
+        self.delete_button.setIconSize(QSize(18, 18))
+        self.delete_button.setToolTip(DELETE_BUTTON_TEXT)
+        self.delete_button.setAccessibleName(DELETE_BUTTON_TEXT)
+        self.delete_button.setStyleSheet(
+            self.delete_button.styleSheet()
+            + "QPushButton { padding: 0px; }"
+            + f"QPushButton:disabled {{ background-color: {self.theme.neutral_color}; }}"
         )
-        clear_button.clicked.connect(self.clear_all)
+        self.delete_button.clicked.connect(self.delete_todo)
+        self.todo_list.itemSelectionChanged.connect(self._update_delete_button)
+        self._update_delete_button()
 
-        button_layout.addWidget(delete_button)
-        button_layout.addWidget(clear_button)
-        self.main_layout.addLayout(button_layout)
+        button_layout.addStretch()
+        button_layout.addWidget(self.delete_button)
+        self.main_layout.addWidget(button_panel)
+
+    def _update_delete_button(self) -> None:
+        self.delete_button.setEnabled(bool(self.todo_list.selectedItems()))
 
     def _add_task_to_list(self, task: Task) -> None:
         item = QListWidgetItem()
@@ -296,8 +308,7 @@ class MainWindow(ResizableWindow):
         item_layout.addWidget(task_label)
 
         edit_button = QPushButton()
-        edit_button.setFixedSize(30, 30)
-        edit_button.setFixedSize(30, 30)
+        edit_button.setFixedSize(ICON_BUTTON_SIZE, ICON_BUTTON_SIZE)
         edit_button.setIcon(create_icon("edit", self.theme.button_text_color))
         edit_button.setIconSize(QSize(18, 18))
         edit_button.setToolTip("Edit task")
@@ -358,10 +369,6 @@ class MainWindow(ResizableWindow):
         selected_tasks = [item.data(Qt.UserRole) for item in selected_items]
         if self.task_manager.remove(selected_tasks):
             self._render_tasks()
-
-    def clear_all(self) -> None:
-        self.task_manager.clear()
-        self._render_tasks()
 
     def open_settings(self) -> None:
         """

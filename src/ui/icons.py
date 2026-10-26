@@ -9,7 +9,7 @@ from PyQt5.QtSvg import QSvgRenderer
 
 # PyInstaller preserves this module's path relative to the bundle root.
 _ICONS_DIR = Path(__file__).resolve().parents[2] / "data" / "icons"
-_ICON_FILES = {"settings": "settings.svg", "edit": "edit.svg"}
+_ICON_FILES = {"settings": "settings.svg", "edit": "edit.svg", "delete": "delete.svg"}
 
 
 def create_icon(name: str, color: str | QColor) -> QIcon:

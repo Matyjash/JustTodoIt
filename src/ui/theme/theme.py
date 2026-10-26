@@ -58,7 +58,7 @@ TIGER_THEME = replace(
     text_color="#F5F5F5",
     lead_color="#FFA500",
     accept_color="#FFA500",
-    decline_color="#E65100",
+    decline_color="#f44336",
     neutral_color="#616161",
     border_color="#424242",
 )
