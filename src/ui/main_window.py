@@ -283,8 +283,9 @@ class MainWindow(ResizableWindow):
         item_widget = DraggableTaskRow(self.todo_list, item)
         item_widget.setStyleSheet(f"background-color: {self.theme.surface_color};")
         item_layout = QHBoxLayout()
-        item_layout.setContentsMargins(0, 0, 0, 0)
-        item_layout.setSpacing(5)
+        status_inset = max(0, (TASK_ROW_HEIGHT - self.theme.task_status_square_size) // 2)
+        item_layout.setContentsMargins(status_inset, 0, 0, 0)
+        item_layout.setSpacing(status_inset)
 
         status_color = self.theme.accept_color if task.done else self.theme.neutral_color
         status_square = QPushButton()
