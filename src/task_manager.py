@@ -1,6 +1,7 @@
 from typing import Iterable, Protocol
 
 from src.task import Task
+from src.daily_task_reset import DailyTaskReset
 
 
 class TaskStorage(Protocol):
@@ -10,14 +11,41 @@ class TaskStorage(Protocol):
 
 
 class TaskManager:
-    def __init__(self, storage: TaskStorage):
+    def __init__(self, storage: TaskStorage, daily_reset: DailyTaskReset | None = None):
+        self._daily_reset = daily_reset or DailyTaskReset()
         self._storage = storage
         self._tasks = list(storage.load_tasks())
         self._normalize_orders()
 
     @property
     def tasks(self) -> tuple[Task, ...]:
-        return tuple(self._tasks)
+        self.reset_daily_tasks()
+        return tuple(sorted(self._tasks, key=lambda task: not task.daily))
+
+    def reset_daily_tasks(self) -> bool:
+        if not self._daily_reset.reset(self._tasks):
+            return False
+        self._save()
+        return True
+
+    def set_daily(self, task: Task, daily: bool) -> bool:
+        if task not in self._tasks or task.daily == daily:
+            return False
+        task.daily = daily
+        self._save()
+        return True
+
+    def move_visible(self, task: Task, before: Task | None) -> bool:
+        if task not in self._tasks or task is before:
+            return False
+        if before is not None and (before not in self._tasks or before.daily != task.daily):
+            return False
+        if before is None:
+            group = [item for item in self._tasks if item.daily == task.daily]
+            destination = self._tasks.index(group[-1]) + 1
+        else:
+            destination = self._tasks.index(before)
+        return self.move(self._tasks.index(task), destination)
 
     def add(self, text: str) -> Task | None:
         text = text.strip()

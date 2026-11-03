@@ -11,9 +11,13 @@ from PyQt5.QtWidgets import (
     QDialog,
     QAbstractItemView,
     QApplication,
+    QCheckBox,
+    QLabel,
 )
-from PyQt5.QtCore import Qt, QEvent, QSize
+from PyQt5.QtCore import Qt, QEvent, QSize, QTimer
 from PyQt5.QtGui import QFont
+from src.settings.daily import DailySettings
+from src.settings.settings_storage import SettingsStorage
 from src.task import Task
 from src.task_manager import TaskManager
 from src.ui.theme.theme import DEFAULT_THEME, Theme
@@ -149,6 +153,9 @@ class MainWindow(ResizableWindow):
         super().__init__(theme)
         self.task_manager = task_manager
         self.init_ui()
+        self.daily_timer = QTimer(self)
+        self.daily_timer.timeout.connect(self._refresh_daily_tasks)
+        self.daily_timer.start(1000)
 
     def init_ui(
         self, restore_geometry: bool = True, initialize_window: bool = True
@@ -329,9 +336,81 @@ class MainWindow(ResizableWindow):
         self.todo_list.setItemWidget(item, item_widget)
 
     def _render_tasks(self) -> None:
+        selected = [item.data(Qt.UserRole) for item in self.todo_list.selectedItems()]
         self.todo_list.clear()
-        for task in self.task_manager.tasks:
-            self._add_task_to_list(task)
+        tasks = self.task_manager.tasks
+        self._render_daily_tasks(tasks)
+        for task in tasks:
+            if not task.daily:
+                self._add_task_to_list(task)
+        for row in range(self.todo_list.count()):
+            item = self.todo_list.item(row)
+            item.setSelected(item.data(Qt.UserRole) in selected)
+
+    def _render_daily_tasks(self, tasks: tuple[Task, ...]) -> None:
+        self.show_daily = None
+        self.only_unfinished = None
+        daily_tasks = [task for task in tasks if task.daily]
+        if not daily_tasks:
+            return
+        self._add_daily_header()
+        if self.show_daily.isChecked():
+            for task in daily_tasks:
+                if not self.only_unfinished.isChecked() or not task.done:
+                    self._add_task_to_list(task)
+        if any(not task.daily for task in tasks):
+            self._add_daily_separator()
+
+    def _add_daily_header(self) -> None:
+        item = QListWidgetItem()
+        item.setFlags(Qt.ItemIsEnabled)
+        item.setSizeHint(QSize(0, 28))
+        self.todo_list.addItem(item)
+        header = QWidget()
+        header.setStyleSheet(f"background-color: {self.theme.surface_color}; color: {self.theme.text_color};")
+        layout = QHBoxLayout(header)
+        layout.setContentsMargins(4, 0, 8, 0)
+        label = QLabel("Daily")
+        font = label.font()
+        font.setBold(True)
+        label.setFont(font)
+        layout.addWidget(label)
+        layout.addStretch()
+        preferences = SettingsStorage.load_settings()
+        self.show_daily = QCheckBox()
+        self.only_unfinished = QCheckBox()
+        self.show_daily.setChecked(preferences.get(DailySettings.SHOW_DAILY_KEY, True))
+        self.only_unfinished.setChecked(preferences.get(DailySettings.ONLY_UNFINISHED_KEY, True))
+        self.show_daily.setToolTip("Show daily ToDos")
+        self.show_daily.setAccessibleName("Show daily ToDos")
+        self.only_unfinished.setToolTip("Show only unfinished daily ToDos")
+        self.only_unfinished.setAccessibleName("Show only unfinished daily ToDos")
+        self.only_unfinished.setEnabled(self.show_daily.isChecked())
+        for checkbox in (self.show_daily, self.only_unfinished):
+            checkbox.toggled.connect(self._daily_visibility_changed)
+            layout.addWidget(checkbox)
+        self.todo_list.setItemWidget(item, header)
+
+    def _add_daily_separator(self) -> None:
+        item = QListWidgetItem()
+        item.setFlags(Qt.NoItemFlags)
+        item.setSizeHint(QSize(0, 2))
+        self.todo_list.addItem(item)
+        separator = QWidget()
+        separator.setStyleSheet(f"background-color: {self.theme.lead_color};")
+        self.todo_list.setItemWidget(item, separator)
+
+    def _daily_visibility_changed(self) -> None:
+        self.only_unfinished.setEnabled(self.show_daily.isChecked())
+        settings = SettingsStorage.load_settings()
+        settings[DailySettings.SHOW_DAILY_KEY] = self.show_daily.isChecked()
+        settings[DailySettings.ONLY_UNFINISHED_KEY] = self.only_unfinished.isChecked()
+        SettingsStorage.save_settings(settings)
+        self._render_tasks()
+
+    def _refresh_daily_tasks(self) -> None:
+        if self.task_manager.reset_daily_tasks():
+            self._render_tasks()
 
     def add_todo(self) -> None:
         """
@@ -340,7 +419,7 @@ class MainWindow(ResizableWindow):
         task = self.task_manager.add(self.input_field.text())
         if task is None:
             return
-        self._add_task_to_list(task)
+        self._render_tasks()
         self.input_field.clear()
 
     def open_edit_dialog(self, task: Task) -> None:
@@ -356,8 +435,9 @@ class MainWindow(ResizableWindow):
         result = edit_dialog.exec_()
 
         if result == QDialog.Accepted and edit_dialog.new_text:
-            if self.task_manager.rename(task, edit_dialog.new_text):
-                self._render_tasks()
+            self.task_manager.rename(task, edit_dialog.new_text)
+            self.task_manager.set_daily(task, edit_dialog.daily_checkbox.isChecked())
+            self._render_tasks()
 
     def delete_todo(self) -> None:
         """
@@ -377,6 +457,7 @@ class MainWindow(ResizableWindow):
         """
         settings_dialog = SettingsDialog(self, self.theme)
         settings_dialog.exec_()
+        self._render_tasks()
 
     def set_theme(self, theme: Theme) -> None:
         """Reloads the window using the selected theme."""
@@ -384,7 +465,19 @@ class MainWindow(ResizableWindow):
         self.init_ui(restore_geometry=False, initialize_window=False)
 
     def _move_task_in_list(self, from_row: int, to_row: int) -> None:
-        if self.task_manager.move(from_row, to_row):
+        source = self.todo_list.item(from_row)
+        if source is None:
+            return
+        task = source.data(Qt.UserRole)
+        if task is None:
+            return
+        before = None
+        for row in range(max(0, to_row), self.todo_list.count()):
+            candidate = self.todo_list.item(row).data(Qt.UserRole)
+            if candidate is not None and candidate.daily == task.daily:
+                before = candidate
+                break
+        if self.task_manager.move_visible(task, before):
             self._render_tasks()
 
     def _toggle_task(self, task: Task) -> None:

@@ -4,12 +4,13 @@ from src.ui.components.window_drag import DraggableDialog
 from PyQt5.QtWidgets import QHBoxLayout, QPushButton, QVBoxLayout
 from src.settings.settings_storage import SettingsStorage
 from src.ui.settings.sections.startup import Startup
+from src.ui.settings.sections.daily import Daily
 from src.ui.settings.sections.theme import Theme as ThemeSection
 from src.ui.theme.theme import DEFAULT_THEME, Theme
 
 
 WINDOW_WIDTH = 400
-WINDOW_HEIGHT = 250
+WINDOW_HEIGHT = 330
 DEFAULT_WINDOW_POSITION = 100
 
 SETTINGS_TITLE = "Settings"
@@ -28,6 +29,7 @@ class SettingsDialog(DraggableDialog):
         self.sections = [
             ThemeSection(self.settings, self.theme, self._apply_theme),
             Startup(self.settings, self.theme),
+            Daily(self.settings, self.theme),
         ]
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog)
         self._init_ui()

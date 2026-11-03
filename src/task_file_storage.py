@@ -16,6 +16,7 @@ class TaskFileStorage:
     KEY_CREATED_AT = "created_at"
     KEY_COMPLETED_AT = "completed_at"
     KEY_ORDER = "order"
+    KEY_DAILY = "daily"
 
     @staticmethod
     def get_file_path() -> str:
@@ -45,6 +46,7 @@ class TaskFileStorage:
                         created_at=created_at,
                         completed_at=item.get(TaskFileStorage.KEY_COMPLETED_AT),
                         order=order,
+                        daily=item.get(TaskFileStorage.KEY_DAILY, False),
                     )
                     tasks.append(task)
                 return tasks
@@ -62,6 +64,7 @@ class TaskFileStorage:
                 TaskFileStorage.KEY_CREATED_AT: task.created_at,
                 TaskFileStorage.KEY_COMPLETED_AT: task.completed_at,
                 TaskFileStorage.KEY_ORDER: task.order,
+                TaskFileStorage.KEY_DAILY: task.daily,
             }
             for task in tasks
         ]

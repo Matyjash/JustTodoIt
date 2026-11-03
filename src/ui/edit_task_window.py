@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
     QLineEdit,
+    QCheckBox,
     QPushButton,
 )
 from PyQt5.QtCore import Qt
@@ -12,7 +13,7 @@ from src.task import Task
 from src.ui.theme.theme import DEFAULT_THEME, Theme
 
 WINDOW_WIDTH = 400
-WINDOW_HEIGHT = 150
+WINDOW_HEIGHT = 185
 
 CONTENT_MARGIN = 10
 CONTENT_SPACING = 10
@@ -79,6 +80,11 @@ class EditTaskDialog(DraggableDialog):
             f"QLineEdit::placeholder {{ color: {self.theme.text_color}; }}"
         )
         content_layout.addWidget(self.input_field)
+
+        self.daily_checkbox = QCheckBox("Daily ToDo")
+        self.daily_checkbox.setStyleSheet(f"color: {self.theme.text_color};")
+        self.daily_checkbox.setChecked(self.task.daily)
+        content_layout.addWidget(self.daily_checkbox)
 
         button_layout = QHBoxLayout()
         button_layout.addStretch()

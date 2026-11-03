@@ -12,8 +12,10 @@ class Task:
         created_at: Optional[str] = None,
         completed_at: Optional[str] = None,
         order: Optional[int] = None,
+        daily: bool = False,
     ):
         self.text = text
+        self.daily = daily
         self.done = done
         self.created_at = created_at if created_at else datetime.now().strftime(Task.TIME_FORMAT)
         self.completed_at = completed_at
@@ -23,6 +25,8 @@ class Task:
         self.done = not self.done
         if self.done:
             self.completed_at = datetime.now().strftime(Task.TIME_FORMAT)
+        else:
+            self.completed_at = None
 
     def __repr__(self):
         return f"Task(text='{self.text}', done={self.done}, order={self.order})"
