@@ -11,7 +11,6 @@ from PyQt5.QtWidgets import (
     QDialog,
     QAbstractItemView,
     QApplication,
-    QCheckBox,
     QLabel,
 )
 from PyQt5.QtCore import Qt, QEvent, QSize, QTimer
@@ -26,6 +25,7 @@ from src.ui.settings.settings_dialog import SettingsDialog
 from src.ui.resizable_window import ResizableWindow
 from src.ui.icons import create_icon
 from src.ui.components.title_bar import TitleBar
+from src.ui.components.checkbox import ThemedCheckBox
 
 WINDOW_TITLE = "Todo App"
 WINDOW_X = 100
@@ -377,8 +377,8 @@ class MainWindow(ResizableWindow):
         layout.addWidget(label)
         layout.addStretch()
         preferences = SettingsStorage.load_settings()
-        self.show_daily = QCheckBox()
-        self.only_unfinished = QCheckBox()
+        self.show_daily = ThemedCheckBox(self.theme)
+        self.only_unfinished = ThemedCheckBox(self.theme)
         self.show_daily.setChecked(preferences.get(DailySettings.SHOW_DAILY_KEY, True))
         self.only_unfinished.setChecked(preferences.get(DailySettings.ONLY_UNFINISHED_KEY, True))
         self.show_daily.setToolTip("Show daily ToDos")

@@ -2,11 +2,11 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
     QLineEdit,
-    QCheckBox,
     QPushButton,
 )
 from PyQt5.QtCore import Qt
 from src.ui.components.title_bar import TitleBar
+from src.ui.components.checkbox import ThemedCheckBox
 from src.ui.components.window_drag import DraggableDialog
 from typing import Optional
 from src.task import Task
@@ -81,8 +81,7 @@ class EditTaskDialog(DraggableDialog):
         )
         content_layout.addWidget(self.input_field)
 
-        self.daily_checkbox = QCheckBox("Daily ToDo")
-        self.daily_checkbox.setStyleSheet(f"color: {self.theme.text_color};")
+        self.daily_checkbox = ThemedCheckBox(self.theme, "Daily ToDo")
         self.daily_checkbox.setChecked(self.task.daily)
         content_layout.addWidget(self.daily_checkbox)
 

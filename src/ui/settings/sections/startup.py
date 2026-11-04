@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import QCheckBox, QLabel
+from PyQt5.QtWidgets import QLabel
+from src.ui.components.checkbox import ThemedCheckBox
 from src.settings.settings_storage import SettingsStorage
 from src.settings.startup import Startup as StartupService
 from src.ui.settings.sections.setting import Setting
@@ -29,8 +30,8 @@ class Startup(Setting):
         section_label.setStyleSheet(f"color: {self.theme.text_color};")
         layout.addWidget(section_label)
 
-        checkbox = QCheckBox(CHECKBOX_LABEL)
-        checkbox.setStyleSheet(f"color: {self.theme.text_color};")
+        checkbox = ThemedCheckBox(self.theme, CHECKBOX_LABEL)
+
         checkbox.setChecked(self.settings.get(SETTING_KEY, False))
         checkbox.setEnabled(self.startup_service.is_supported())
         checkbox.stateChanged.connect(self._on_state_changed)
