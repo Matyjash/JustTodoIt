@@ -143,8 +143,6 @@ class ResizableWindow(Window):
                 self.last_mouse_y = event.y()
             else:
                 super().mousePressEvent(event)
-            self.mouse_press_x = event.x()
-            self.mouse_press_y = event.y()
 
     def mouseMoveEvent(self, event: QEvent) -> None:
         """Handle mouse move for cursor updates and resizing/dragging."""

@@ -16,8 +16,6 @@ class Window(QMainWindow):
         super().__init__()
         self.theme = theme
         self.window_drag = WindowDrag(self)
-        self.mouse_press_x: int = 0
-        self.mouse_press_y: int = 0
         self.is_maximized: bool = False
         self.normal_geometry = self.geometry()
 
