@@ -12,7 +12,7 @@ from src.settings.theme import ThemeSettings
 from src.task_file_storage import TaskFileStorage
 from src.task_manager import TaskManager
 from src.ui.main_window import MainWindow
-from src.ui.theme.theme import TIGER_THEME_NAME
+from src.ui.theme.theme import DEFAULT_THEME_NAME, TIGER_THEME_NAME
 
 
 CAPTURE_SIZE = QSize(309, 442)
@@ -20,13 +20,14 @@ CAPTURE_DELAY_MS = 150
 CAPTURE_DEVICE_PIXEL_RATIO = 1
 
 PREVIEW_TASK_TEXT = "develop this app"
+PREVIEW_DAILY_TASK_TEXT = "change underwear"
 PREVIEW_THEME_NAME = TIGER_THEME_NAME
 
 WINDOW_SETTINGS_FILENAME = "window.ini"
 PREVIEW_PATH = Path(__file__).resolve().parent / "docs" / "app_preview.png"
 
 
-def capture(app, add_task=False):
+def capture(app, add_task=False, add_daily_task=False):
     window = MainWindow(
         TaskManager(TaskFileStorage()), ThemeSettings.load_selected_theme()
     )
@@ -35,6 +36,10 @@ def capture(app, add_task=False):
     if add_task:
         window.input_field.setText(PREVIEW_TASK_TEXT)
         window.add_todo()
+    if add_daily_task:
+        task = window.task_manager.add(PREVIEW_DAILY_TASK_TEXT)
+        window.task_manager.set_daily(task, True)
+        window._render_tasks()
     window.input_field.clearFocus()
     QTest.qWait(CAPTURE_DELAY_MS)
     app.processEvents()
@@ -53,9 +58,10 @@ def main():
         with patch("src.app_data.get_app_data_dir", return_value=directory), patch(
             "src.ui.base_window.QSettings", return_value=geometry
         ):
-            default = capture(app, add_task=True)
             ThemeSettings.select_theme(SettingsStorage.load_settings(), PREVIEW_THEME_NAME)
-            tiger = capture(app)
+            tiger = capture(app, add_task=True)
+            ThemeSettings.select_theme(SettingsStorage.load_settings(), DEFAULT_THEME_NAME)
+            default = capture(app, add_daily_task=True)
 
     screenshots = (tiger, default)
     preview = QImage(
