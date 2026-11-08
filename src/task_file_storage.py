@@ -1,9 +1,7 @@
-import json
-import os
-from datetime import datetime
 from typing import List
 from src.app_data import get_data_file_path
 from src.task import Task
+from src.json_file import StorageError, read_json, write_json
 
 
 class TaskFileStorage:
@@ -25,33 +23,35 @@ class TaskFileStorage:
     @staticmethod
     def load_tasks() -> List[Task]:
         file_path = TaskFileStorage.get_file_path()
-
-        if not os.path.exists(file_path):
-            return []
-
+        data = read_json(file_path, [])
         try:
-            with open(file_path, "r") as f:
-                data = json.load(f)
-                tasks = []
-                for index, item in enumerate(data):
-                    created_at = item.get(TaskFileStorage.KEY_CREATED_AT)
-                    if not created_at:
-                        created_at = datetime.now().strftime(Task.TIME_FORMAT)
-                    order = item.get(TaskFileStorage.KEY_ORDER)
-                    if order is None:
-                        order = index
-                    task = Task(
-                        text=item[TaskFileStorage.KEY_TEXT],
-                        done=item[TaskFileStorage.KEY_DONE],
-                        created_at=created_at,
-                        completed_at=item.get(TaskFileStorage.KEY_COMPLETED_AT),
-                        order=order,
-                        daily=item.get(TaskFileStorage.KEY_DAILY, False),
-                    )
-                    tasks.append(task)
-                return tasks
-        except (json.JSONDecodeError, KeyError, IOError):
-            return []
+            if not isinstance(data, list):
+                raise ValueError("Expected a list of tasks")
+            tasks = []
+            for index, item in enumerate(data):
+                if not isinstance(item, dict):
+                    raise ValueError("Expected a task object")
+                if not isinstance(item.get(TaskFileStorage.KEY_TEXT), str):
+                    raise ValueError("Task text must be a string")
+                if not isinstance(item.get(TaskFileStorage.KEY_DONE), bool):
+                    raise ValueError("Task completion must be a boolean")
+                if not isinstance(item.get(TaskFileStorage.KEY_DAILY, False), bool):
+                    raise ValueError("Daily task status must be a boolean")
+                for key in (TaskFileStorage.KEY_CREATED_AT, TaskFileStorage.KEY_COMPLETED_AT):
+                    if item.get(key) is not None and not isinstance(item[key], str):
+                        raise ValueError(f"Task {key} must be a string or null")
+                order = item.get(TaskFileStorage.KEY_ORDER)
+                tasks.append(Task(
+                    text=item[TaskFileStorage.KEY_TEXT],
+                    done=item[TaskFileStorage.KEY_DONE],
+                    created_at=item.get(TaskFileStorage.KEY_CREATED_AT),
+                    completed_at=item.get(TaskFileStorage.KEY_COMPLETED_AT),
+                    order=index if order is None else order,
+                    daily=item.get(TaskFileStorage.KEY_DAILY, False),
+                ))
+            return tasks
+        except (TypeError, ValueError, OverflowError) as error:
+            raise StorageError(file_path, "read", str(error)) from error
 
     @staticmethod
     def save_tasks(tasks: List[Task]) -> None:
@@ -69,9 +69,4 @@ class TaskFileStorage:
             for task in tasks
         ]
 
-        try:
-            os.makedirs(os.path.dirname(file_path), exist_ok=True)
-            with open(file_path, "w") as f:
-                json.dump(data, f, indent=2)
-        except IOError as e:
-            print(f"Error saving tasks: {e}")
+        write_json(file_path, data)

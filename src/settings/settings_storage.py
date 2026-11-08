@@ -1,8 +1,7 @@
-import json
-import os
 from typing import List
 from src.app_data import get_data_file_path
 from src.settings.setting import Setting
+from src.json_file import StorageError, read_json, write_json
 
 
 class SettingsStorage:
@@ -21,15 +20,10 @@ class SettingsStorage:
         """
         file_path = SettingsStorage.get_file_path()
 
-        if not os.path.exists(file_path):
-            return SettingsStorage._get_default_settings()
-
-        try:
-            with open(file_path, "r") as f:
-                data = json.load(f)
-                return data
-        except (json.JSONDecodeError, IOError):
-            return SettingsStorage._get_default_settings()
+        data = read_json(file_path, SettingsStorage._get_default_settings())
+        if not isinstance(data, dict):
+            raise StorageError(file_path, "read", "Expected a settings object")
+        return data
 
     @staticmethod
     def load_settings_as_objects() -> List[Setting]:
@@ -46,12 +40,7 @@ class SettingsStorage:
         """
         file_path = SettingsStorage.get_file_path()
 
-        try:
-            os.makedirs(os.path.dirname(file_path), exist_ok=True)
-            with open(file_path, "w") as f:
-                json.dump(settings_dict, f, indent=2)
-        except IOError as e:
-            print(f"Error saving settings: {e}")
+        write_json(file_path, settings_dict)
 
     @staticmethod
     def save_settings_from_objects(settings: List[Setting]) -> None:
