@@ -271,6 +271,20 @@ class MainWindow(ResizableWindow):
     def _update_delete_button(self) -> None:
         self.delete_button.setEnabled(bool(self.todo_list.selectedItems()))
 
+    def _create_task_row_button(self, background_color: str) -> QPushButton:
+        button = QPushButton()
+        button_size = self.theme.task_row_button_size
+        button_padding = self.theme.task_row_button_padding
+        icon_size = max(0, button_size - 2 * button_padding)
+        button.setFixedSize(button_size, button_size)
+        button.setIconSize(QSize(icon_size, icon_size))
+        button.setStyleSheet(
+            f"QPushButton {{ background-color: {background_color}; color: {self.theme.button_text_color}; "
+            f"border: none; border-radius: {self.theme.task_row_button_border_radius}px; "
+            f"padding: {button_padding}px; }}"
+        )
+        return button
+
     def _add_task_to_list(self, task: Task) -> None:
         item = QListWidgetItem()
         item.setData(Qt.UserRole, task)
@@ -283,22 +297,17 @@ class MainWindow(ResizableWindow):
         item_widget = DraggableTaskRow(self.todo_list, item)
         item_widget.setStyleSheet(f"background-color: {self.theme.surface_color};")
         item_layout = QHBoxLayout()
-        status_inset = max(0, (TASK_ROW_HEIGHT - self.theme.task_status_square_size) // 2)
-        item_layout.setContentsMargins(status_inset, 0, 0, 0)
-        item_layout.setSpacing(status_inset)
+        button_inset = max(0, (TASK_ROW_HEIGHT - self.theme.task_row_button_size) // 2)
+        item_layout.setContentsMargins(button_inset, 0, button_inset, 0)
+        item_layout.setSpacing(button_inset)
 
         status_color = self.theme.accept_color if task.done else self.theme.neutral_color
-        status_square = QPushButton()
-        status_square.setMaximumSize(self.theme.task_status_square_size, self.theme.task_status_square_size)
-        status_square.setStyleSheet(
-            f"QPushButton {{ background-color: {status_color}; border: none; border-radius: 2px; padding: {self.theme.task_status_square_padding}; }}"
-            f"QPushButton:hover {{ opacity: 0.8; }}"
-        )
-        status_square.clicked.connect(
+        status_button = self._create_task_row_button(status_color)
+        status_button.clicked.connect(
             lambda checked, task=task: self._toggle_task(task)
         )
-        item_widget.add_drag_source(status_square)
-        item_layout.addWidget(status_square)
+        item_widget.add_drag_source(status_button)
+        item_layout.addWidget(status_button)
 
         task_label = QPushButton(task.text)
         task_label.setStyleSheet(
@@ -308,16 +317,10 @@ class MainWindow(ResizableWindow):
         item_widget.add_drag_source(task_label)
         item_layout.addWidget(task_label)
 
-        edit_button = QPushButton()
-        edit_button.setFixedSize(ICON_BUTTON_SIZE, ICON_BUTTON_SIZE)
+        edit_button = self._create_task_row_button(self.theme.neutral_color)
         edit_button.setIcon(create_icon("edit", self.theme.button_text_color))
-        edit_button.setIconSize(QSize(18, 18))
         edit_button.setToolTip("Edit task")
         edit_button.setAccessibleName("Edit task")
-        edit_button.setStyleSheet(
-            f"QPushButton {{ background-color: {self.theme.neutral_color}; color: {self.theme.button_text_color}; "
-            f"padding: {self.theme.edit_btn_padding}; border: none; border-radius: 4px; }}"
-        )
         edit_button.clicked.connect(
             lambda checked, task=task: self.open_edit_dialog(task)
         )

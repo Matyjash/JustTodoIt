@@ -25,16 +25,15 @@ class Theme:
     list_item_font_name: str = "Arial"
     list_item_font_size: int = 10
 
+    task_row_button_size: int = 20
+    task_row_button_padding: int = 4
+    task_row_button_border_radius: int = 2
+
     delete_btn_padding: str = "8px 15px"
 
     clear_btn_padding: str = "8px 15px"
 
-    edit_btn_padding: str = "6px"
-
     save_btn_padding: str = "8px 15px"
-
-    task_status_square_size: int = 20
-    task_status_square_padding: str = "4px"
 
 
 DEFAULT_THEME = Theme()
