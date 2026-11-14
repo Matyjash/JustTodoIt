@@ -1,7 +1,7 @@
 # Run this script to generate the .exe file using PyInstaller
 
 param(
-    [switch]$WithIcon = $false
+    [switch]$WithIcon = $true
 )
 
 $pyinstaller = pip show pyinstaller
@@ -14,8 +14,8 @@ Write-Host "Building JustTodoIt executable..." -ForegroundColor Cyan
 
 $buildCmd = "pyinstaller --onefile --windowed --name=JustTodoIt --add-data='data;data' app.py"
 
-if ($WithIcon -and (Test-Path "icon.ico")) {
-    $buildCmd += " --icon=icon.ico"
+if ($WithIcon -and (Test-Path "data/icons/app.ico")) {
+    $buildCmd += " --icon=data/icons/app.ico"
     Write-Host "Using custom icon..." -ForegroundColor Green
 }
 

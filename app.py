@@ -10,10 +10,12 @@ from src.app_data import get_data_file_path
 from src.single_instance import SingleInstanceLock
 from src.ui.main_window import MainWindow
 from src.ui.storage_error_handler import StorageErrorHandler
+from src.ui.icons import load_app_icon
 
 
 def main():
     app = QApplication(sys.argv)
+    app.setWindowIcon(load_app_icon())
     instance_lock = SingleInstanceLock(get_data_file_path("instance.lock"))
     error_handler = StorageErrorHandler(app)
     sys.excepthook = error_handler

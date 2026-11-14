@@ -9,7 +9,16 @@ from PyQt5.QtSvg import QSvgRenderer
 
 # PyInstaller preserves this module's path relative to the bundle root.
 _ICONS_DIR = Path(__file__).resolve().parents[2] / "data" / "icons"
-_ICON_FILES = {"settings": "settings.svg", "edit": "edit.svg", "delete": "delete.svg"}
+_ICON_FILES = {
+    "settings": "settings.svg",
+    "edit": "edit.svg",
+    "delete": "delete.svg",
+    "logo": "logo.svg",
+}
+
+
+def load_app_icon() -> QIcon:
+    return QIcon(str(_ICONS_DIR / "app.ico"))
 
 
 def create_icon(name: str, color: str | QColor) -> QIcon:

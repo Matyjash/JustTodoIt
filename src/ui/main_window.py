@@ -167,7 +167,11 @@ class MainWindow(ResizableWindow):
         top_layout.setContentsMargins(0, 0, 0, 0)
         top_layout.setSpacing(0)
 
-        title_bar = TitleBar(TITLE_TEXT, self.theme)
+        title_bar = TitleBar(
+            TITLE_TEXT,
+            self.theme,
+            icon=create_icon("logo", self.theme.button_text_color),
+        )
 
         settings_button = QPushButton()
         settings_button.setIcon(create_icon("settings", self.theme.button_text_color))

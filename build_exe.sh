@@ -1,7 +1,7 @@
 #!/bin/bash
 # Run this script to generate the executable using PyInstaller
 
-WITH_ICON=false
+WITH_ICON=true
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -24,8 +24,8 @@ echo "Building JustTodoIt executable..."
 
 BUILD_CMD="pyinstaller --onefile --windowed --name=JustTodoIt --add-data='data:data' app.py"
 
-if [ "$WITH_ICON" = true ] && [ -f "icon.ico" ]; then
-    BUILD_CMD="$BUILD_CMD --icon=icon.ico"
+if [ "$WITH_ICON" = true ] && [ -f "data/icons/app.ico" ]; then
+    BUILD_CMD="$BUILD_CMD --icon=data/icons/app.ico"
     echo "Using custom icon..."
 fi
 

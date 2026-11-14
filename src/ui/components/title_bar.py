@@ -1,14 +1,14 @@
 from collections.abc import Callable
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QHBoxLayout, QPushButton, QWidget
+from PyQt5.QtGui import QFont, QIcon
+from PyQt5.QtWidgets import QHBoxLayout, QLabel, QPushButton, QWidget
 
 from src.ui.theme.theme import Theme
 
 
 class TitleBar(QWidget):
-    def __init__(self, title: str, theme: Theme | None, parent=None):
+    def __init__(self, title: str, theme: Theme | None, parent=None, *, icon: QIcon | None = None):
         super().__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.theme = theme
@@ -17,6 +17,14 @@ class TitleBar(QWidget):
         layout = QHBoxLayout(self)
         layout.setContentsMargins(10, 5, 5, 5)
         layout.setSpacing(5)
+        if icon is not None:
+            logo = QLabel(self)
+            logo.setFixedSize(24, 24)
+            pixmap = icon.pixmap(48, 48)
+            pixmap.setDevicePixelRatio(2)
+            logo.setPixmap(pixmap)
+            logo.setAttribute(Qt.WA_TransparentForMouseEvents, True)
+            layout.addWidget(logo)
         label = QPushButton(title)
         if theme:
             label.setFont(QFont(theme.title_font_name, theme.title_font_size, QFont.Bold))
