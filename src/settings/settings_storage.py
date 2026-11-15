@@ -1,6 +1,4 @@
-from typing import List
 from src.app_data import get_data_file_path
-from src.settings.setting import Setting
 from src.json_file import StorageError, read_json, write_json
 
 
@@ -26,14 +24,6 @@ class SettingsStorage:
         return data
 
     @staticmethod
-    def load_settings_as_objects() -> List[Setting]:
-        """
-        Load all settings as Setting objects.
-        """
-        settings_dict = SettingsStorage.load_settings()
-        return [Setting(key, value) for key, value in settings_dict.items()]
-
-    @staticmethod
     def save_settings(settings_dict: dict) -> None:
         """
         Save settings from a dictionary.
@@ -43,33 +33,8 @@ class SettingsStorage:
         write_json(file_path, settings_dict)
 
     @staticmethod
-    def save_settings_from_objects(settings: List[Setting]) -> None:
-        """
-        Save settings from a list of Setting objects.
-        """
-        settings_dict = {setting.key: setting.value for setting in settings}
-        SettingsStorage.save_settings(settings_dict)
-
-    @staticmethod
     def _get_default_settings() -> dict:
         return {
             "startup": False,
             "theme": "Default",
         }
-
-    @staticmethod
-    def get_setting(key: str, default=None):
-        """
-        Get a single setting by key.
-        """
-        settings = SettingsStorage.load_settings()
-        return settings.get(key, default)
-
-    @staticmethod
-    def set_setting(key: str, value) -> None:
-        """
-        Set a single setting by key.
-        """
-        settings = SettingsStorage.load_settings()
-        settings[key] = value
-        SettingsStorage.save_settings(settings)

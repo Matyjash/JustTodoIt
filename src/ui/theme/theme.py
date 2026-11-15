@@ -31,8 +31,6 @@ class Theme:
 
     delete_btn_padding: str = "8px 15px"
 
-    clear_btn_padding: str = "8px 15px"
-
     save_btn_padding: str = "8px 15px"
 
 

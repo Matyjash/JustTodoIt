@@ -80,11 +80,6 @@ class TaskManager:
         self._save()
         return True
 
-    def clear(self) -> None:
-        if self._tasks:
-            self._tasks.clear()
-            self._save()
-
     def move(self, from_index: int, insertion_index: int) -> bool:
         if not 0 <= from_index < len(self._tasks):
             return False

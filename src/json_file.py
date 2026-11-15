@@ -7,7 +7,6 @@ import tempfile
 class StorageError(Exception):
     def __init__(self, path: str | Path, operation: str, reason: str):
         self.path = str(path)
-        self.operation = operation
         super().__init__(f"Could not {operation} {self.path}: {reason}")
 
 
