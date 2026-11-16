@@ -1,5 +1,6 @@
 from src.settings.settings_storage import SettingsStorage
-from src.ui.theme.theme import DEFAULT_THEME, DEFAULT_THEME_NAME, THEMES, Theme
+from src.ui.theme.registry import THEMES
+from src.ui.theme.theme import DEFAULT_THEME, DEFAULT_THEME_NAME, Theme
 
 
 THEME_SETTING_KEY = "theme"

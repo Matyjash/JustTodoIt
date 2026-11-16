@@ -1,4 +1,4 @@
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 
 
 @dataclass
@@ -36,30 +36,3 @@ class Theme:
 
 DEFAULT_THEME = Theme()
 DEFAULT_THEME_NAME = "Default"
-
-BLUE_THEME_NAME = "Blue"
-BLUE_THEME = replace(
-    DEFAULT_THEME,
-    background_color="#E8EAF6",
-    lead_color="#3F51B5",
-    accept_color="#3F51B5",
-)
-
-TIGER_THEME_NAME = "Tiger"
-TIGER_THEME = replace(
-    DEFAULT_THEME,
-    background_color="#000000",
-    surface_color="#1A1A1A",
-    text_color="#F5F5F5",
-    lead_color="#FFA500",
-    accept_color="#FFA500",
-    decline_color="#f44336",
-    neutral_color="#616161",
-    border_color="#424242",
-)
-
-THEMES = {
-    DEFAULT_THEME_NAME: DEFAULT_THEME,
-    BLUE_THEME_NAME: BLUE_THEME,
-    TIGER_THEME_NAME: TIGER_THEME,
-}
