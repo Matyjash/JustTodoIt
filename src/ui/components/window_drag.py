@@ -2,8 +2,11 @@ from PyQt5.QtCore import QEvent, Qt
 from PyQt5.QtWidgets import QDialog
 
 
+DEFAULT_DRAG_THRESHOLD_Y = 50
+
+
 class WindowDrag:
-    def __init__(self, window, threshold_y: int = 50):
+    def __init__(self, window, threshold_y: int = DEFAULT_DRAG_THRESHOLD_Y):
         self.window = window
         self.threshold_y = threshold_y
         self.position = None
@@ -23,7 +26,7 @@ class WindowDrag:
 
 
 class DraggableDialog(QDialog):
-    def __init__(self, parent=None, drag_threshold_y: int = 50):
+    def __init__(self, parent=None, drag_threshold_y: int = DEFAULT_DRAG_THRESHOLD_Y):
         super().__init__(parent)
         self.window_drag = WindowDrag(self, drag_threshold_y)
 

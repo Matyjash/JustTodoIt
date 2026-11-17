@@ -36,6 +36,7 @@ WINDOW_MARGIN = 10
 WINDOW_SPACING = 10
 TASK_ROW_HEIGHT = 36
 ICON_BUTTON_SIZE = 30
+DAILY_REFRESH_INTERVAL_MS = 1000
 
 TITLE_TEXT = "Just ToDo It"
 INPUT_PLACEHOLDER = "Add a new task..."
@@ -148,7 +149,7 @@ class MainWindow(ResizableWindow):
         self.init_ui()
         self.daily_timer = QTimer(self)
         self.daily_timer.timeout.connect(self._refresh_daily_tasks)
-        self.daily_timer.start(1000)
+        self.daily_timer.start(DAILY_REFRESH_INTERVAL_MS)
 
     def init_ui(
         self, restore_geometry: bool = True, initialize_window: bool = True

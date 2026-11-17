@@ -13,6 +13,7 @@ from src.ui.theme.theme import DEFAULT_THEME, Theme
 WINDOW_WIDTH = 380
 WINDOW_HEIGHT = 460
 DEFAULT_WINDOW_POSITION = 100
+SETTINGS_DRAG_THRESHOLD_Y = 40
 
 SETTINGS_TITLE = "Settings"
 CLOSE_DIALOG_BUTTON_TEXT = "Close"
@@ -24,7 +25,7 @@ class SettingsDialog(DraggableDialog):
     """Displays and coordinates the available settings sections."""
 
     def __init__(self, parent=None, theme: Theme = DEFAULT_THEME):
-        super().__init__(parent, drag_threshold_y=40)
+        super().__init__(parent, drag_threshold_y=SETTINGS_DRAG_THRESHOLD_Y)
         self.theme = theme
         self.settings = SettingsStorage.load_settings()
         self.sections = [
