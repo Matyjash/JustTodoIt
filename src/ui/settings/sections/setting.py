@@ -2,6 +2,12 @@ from abc import ABC, abstractmethod
 from PyQt5.QtWidgets import QFrame, QHBoxLayout, QLabel, QVBoxLayout
 
 
+SECTION_MARGINS = (16, 14, 16, 14)
+SECTION_SPACING = 10
+CONTROL_MIN_WIDTH = 144
+CONTROL_MIN_HEIGHT = 34
+
+
 class Setting(ABC):
     """Defines the interface for a settings dialog section."""
 
@@ -9,8 +15,8 @@ class Setting(ABC):
         card = QFrame()
         card.setObjectName("settingsSection")
         content = QVBoxLayout(card)
-        content.setContentsMargins(16, 14, 16, 14)
-        content.setSpacing(10)
+        content.setContentsMargins(*SECTION_MARGINS)
+        content.setSpacing(SECTION_SPACING)
         heading = QLabel(title)
         heading.setObjectName("sectionHeading")
         content.addWidget(heading)
@@ -23,8 +29,8 @@ class Setting(ABC):
         label.setBuddy(control)
         row.addWidget(label)
         row.addStretch()
-        control.setMinimumWidth(144)
-        control.setMinimumHeight(34)
+        control.setMinimumWidth(CONTROL_MIN_WIDTH)
+        control.setMinimumHeight(CONTROL_MIN_HEIGHT)
         row.addWidget(control)
         layout.addLayout(row)
 

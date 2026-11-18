@@ -9,6 +9,7 @@ from PyQt5.QtSvg import QSvgRenderer
 
 # PyInstaller preserves this module's path relative to the bundle root.
 _ICONS_DIR = Path(__file__).resolve().parents[2] / "data" / "icons"
+ICON_RASTER_SIZES = (16, 18, 20, 24, 32, 36, 40, 48, 64)
 _ICON_FILES = {
     "settings": "settings.svg",
     "edit": "edit.svg",
@@ -31,7 +32,7 @@ def create_icon(name: str, color: str | QColor) -> QIcon:
     renderer = QSvgRenderer(QByteArray(svg.encode("utf-8")))
     icon = QIcon()
     # Include larger rasters so Qt can select a sharp image on high-DPI screens.
-    for size in (16, 18, 20, 24, 32, 36, 40, 48, 64):
+    for size in ICON_RASTER_SIZES:
         pixmap = QPixmap(size, size)
         pixmap.fill(Qt.transparent)
         painter = QPainter(pixmap)

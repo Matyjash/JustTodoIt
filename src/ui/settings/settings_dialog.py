@@ -19,6 +19,7 @@ SETTINGS_TITLE = "Settings"
 CLOSE_DIALOG_BUTTON_TEXT = "Close"
 CONTENT_MARGIN = 20
 CONTENT_SPACING = 12
+MUTED_TEXT_FOREGROUND_WEIGHT = 0.65
 
 
 class SettingsDialog(DraggableDialog):
@@ -58,7 +59,10 @@ class SettingsDialog(DraggableDialog):
         muted = QColor(theme.text_color)
         surface = QColor(theme.surface_color)
         muted.setRgb(*[
-            round(foreground * 0.65 + background * 0.35)
+            round(
+                foreground * MUTED_TEXT_FOREGROUND_WEIGHT
+                + background * (1 - MUTED_TEXT_FOREGROUND_WEIGHT)
+            )
             for foreground, background in zip(muted.getRgb()[:3], surface.getRgb()[:3])
         ])
         self.setStyleSheet(

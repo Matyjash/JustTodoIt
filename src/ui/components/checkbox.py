@@ -5,6 +5,11 @@ from PyQt5.QtWidgets import QCheckBox, QStyle, QStyleOptionButton
 from src.ui.theme.theme import Theme
 
 
+DISABLED_OPACITY = 0.45
+BORDER_WIDTH = 1.5
+CHECKMARK_WIDTH = 1.8
+
+
 class ThemedCheckBox(QCheckBox):
     """Checkbox with a scalable, theme-colored square and checkmark."""
 
@@ -27,21 +32,21 @@ class ThemedCheckBox(QCheckBox):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
         if not self.isEnabled():
-            painter.setOpacity(0.45)
+            painter.setOpacity(DISABLED_OPACITY)
         checked = self.checkState() != Qt.Unchecked
         highlighted = self.isEnabled() and bool(option.state & (QStyle.State_MouseOver | QStyle.State_HasFocus))
         fill = self.theme.lead_color if checked else self.theme.surface_color
         border = self.theme.lead_color if checked or highlighted else self.theme.neutral_color
         square = QRectF(indicator).adjusted(2, 2, -2, -2)
         painter.setBrush(QColor(fill))
-        painter.setPen(QPen(QColor(border), 1.5))
+        painter.setPen(QPen(QColor(border), BORDER_WIDTH))
         painter.drawRoundedRect(square, 2, 2)
         if highlighted:
             painter.setBrush(Qt.NoBrush)
             painter.setPen(QPen(QColor(self.theme.lead_color), 1))
             painter.drawRoundedRect(QRectF(indicator).adjusted(0.5, 0.5, -0.5, -0.5), 3, 3)
         if checked:
-            painter.setPen(QPen(QColor(self.theme.button_text_color), 1.8, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
+            painter.setPen(QPen(QColor(self.theme.button_text_color), CHECKMARK_WIDTH, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
             mark = QPainterPath()
             if self.checkState() == Qt.PartiallyChecked:
                 mark.moveTo(square.left() + 3, square.center().y())

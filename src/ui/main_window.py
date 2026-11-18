@@ -36,6 +36,12 @@ WINDOW_MARGIN = 10
 WINDOW_SPACING = 10
 TASK_ROW_HEIGHT = 36
 ICON_BUTTON_SIZE = 30
+SETTINGS_ICON_SIZE = 20
+SETTINGS_BUTTON_MAX_WIDTH = 35
+DELETE_ICON_SIZE = 18
+DAILY_HEADER_HEIGHT = 28
+DAILY_HEADER_MARGINS = (4, 0, 8, 0)
+DAILY_SEPARATOR_HEIGHT = 2
 DAILY_REFRESH_INTERVAL_MS = 1000
 
 TITLE_TEXT = "Just ToDo It"
@@ -176,10 +182,10 @@ class MainWindow(ResizableWindow):
 
         settings_button = QPushButton()
         settings_button.setIcon(create_icon("settings", self.theme.button_text_color))
-        settings_button.setIconSize(QSize(20, 20))
+        settings_button.setIconSize(QSize(SETTINGS_ICON_SIZE, SETTINGS_ICON_SIZE))
         settings_button.setToolTip("Settings")
         settings_button.setAccessibleName("Settings")
-        settings_button.setMaximumWidth(35)
+        settings_button.setMaximumWidth(SETTINGS_BUTTON_MAX_WIDTH)
         settings_button.setStyleSheet(
             f"QPushButton {{ background-color: transparent; color: {self.theme.button_text_color}; "
             f"border: none; font-size: 16px; padding: 0px; }}"
@@ -257,7 +263,7 @@ class MainWindow(ResizableWindow):
         self.delete_button.setText("")
         self.delete_button.setFixedSize(ICON_BUTTON_SIZE, ICON_BUTTON_SIZE)
         self.delete_button.setIcon(create_icon("delete", self.theme.button_text_color))
-        self.delete_button.setIconSize(QSize(18, 18))
+        self.delete_button.setIconSize(QSize(DELETE_ICON_SIZE, DELETE_ICON_SIZE))
         self.delete_button.setToolTip(DELETE_BUTTON_TEXT)
         self.delete_button.setAccessibleName(DELETE_BUTTON_TEXT)
         self.delete_button.setStyleSheet(
@@ -365,12 +371,12 @@ class MainWindow(ResizableWindow):
     def _add_daily_header(self) -> None:
         item = QListWidgetItem()
         item.setFlags(Qt.ItemIsEnabled)
-        item.setSizeHint(QSize(0, 28))
+        item.setSizeHint(QSize(0, DAILY_HEADER_HEIGHT))
         self.todo_list.addItem(item)
         header = QWidget()
         header.setStyleSheet(f"background-color: {self.theme.surface_color}; color: {self.theme.text_color};")
         layout = QHBoxLayout(header)
-        layout.setContentsMargins(4, 0, 8, 0)
+        layout.setContentsMargins(*DAILY_HEADER_MARGINS)
         label = QLabel("Daily")
         font = label.font()
         font.setBold(True)
@@ -395,7 +401,7 @@ class MainWindow(ResizableWindow):
     def _add_daily_separator(self) -> None:
         item = QListWidgetItem()
         item.setFlags(Qt.NoItemFlags)
-        item.setSizeHint(QSize(0, 2))
+        item.setSizeHint(QSize(0, DAILY_SEPARATOR_HEIGHT))
         self.todo_list.addItem(item)
         separator = QWidget()
         separator.setStyleSheet(f"background-color: {self.theme.lead_color};")
