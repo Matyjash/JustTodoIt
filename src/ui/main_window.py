@@ -384,8 +384,12 @@ class MainWindow(ResizableWindow):
         layout.addWidget(label)
         layout.addStretch()
         preferences = SettingsStorage.load_settings()
-        self.show_daily = ThemedCheckBox(self.theme)
-        self.only_unfinished = ThemedCheckBox(self.theme)
+        self.show_daily = ThemedCheckBox(
+            self.theme, indicator_icon=create_icon("visibility", self.theme.text_color)
+        )
+        self.only_unfinished = ThemedCheckBox(
+            self.theme, indicator_icon=create_icon("unfinished-filter", self.theme.text_color)
+        )
         self.show_daily.setChecked(preferences.get(DailySettings.SHOW_DAILY_KEY, True))
         self.only_unfinished.setChecked(preferences.get(DailySettings.ONLY_UNFINISHED_KEY, True))
         self.show_daily.setToolTip("Show daily ToDos")

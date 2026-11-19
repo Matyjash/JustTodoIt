@@ -15,6 +15,8 @@ _ICON_FILES = {
     "edit": "edit.svg",
     "delete": "delete.svg",
     "logo": "logo.svg",
+    "visibility": "visibility.svg",
+    "unfinished-filter": "unfinished-filter.svg",
 }
 
 
