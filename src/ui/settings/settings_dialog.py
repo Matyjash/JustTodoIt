@@ -1,12 +1,12 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor
+from PyQt5.QtGui import QColor, QFont
 from src.ui.components.title_bar import TitleBar
 from src.ui.components.window_drag import DraggableDialog
-from PyQt5.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout
+from PyQt5.QtWidgets import QApplication, QHBoxLayout, QLabel, QPushButton, QVBoxLayout
 from src.settings.settings_storage import SettingsStorage
 from src.ui.settings.sections.startup import Startup
 from src.ui.settings.sections.daily import Daily
-from src.ui.settings.sections.theme import Theme as ThemeSection
+from src.ui.settings.sections.appearance import Appearance
 from src.ui.theme.theme import DEFAULT_THEME, Theme
 
 
@@ -30,7 +30,7 @@ class SettingsDialog(DraggableDialog):
         self.theme = theme
         self.settings = SettingsStorage.load_settings()
         self.sections = [
-            ThemeSection(self.settings, self._apply_theme),
+            Appearance(self.settings, self._apply_theme, self._apply_font),
             Startup(self.settings, self.theme),
             Daily(self.settings),
         ]
@@ -67,12 +67,12 @@ class SettingsDialog(DraggableDialog):
         ])
         self.setStyleSheet(
             f"QDialog#settingsDialog {{ background: {theme.background_color}; }}"
-            f"QLabel, QCheckBox {{ color: {theme.text_color}; font-family: 'Segoe UI'; font-size: 10pt; background: transparent; }}"
+            f"QLabel, QCheckBox {{ color: {theme.text_color}; font-size: 10pt; background: transparent; }}"
             f"QFrame#settingsSection {{ background: {theme.surface_color}; border: 1px solid {theme.border_color}; border-radius: 8px; }}"
             "QLabel#sectionHeading { font-size: 10pt; font-weight: 600; }"
             f"QLabel#settingDescription, QLabel#saveHint {{ color: {muted.name()}; font-size: 9pt; }}"
             f"QComboBox, QTimeEdit {{ color: {theme.text_color}; background: {theme.background_color}; "
-            f"border: 1px solid {theme.border_color}; border-radius: 5px; padding: 0 10px; font-family: 'Segoe UI'; font-size: 10pt; }}"
+            f"border: 1px solid {theme.border_color}; border-radius: 5px; padding: 0 10px; font-size: 10pt; }}"
             f"QComboBox:focus, QTimeEdit:focus {{ border: 1px solid {theme.lead_color}; }}"
             f"QComboBox QAbstractItemView {{ color: {theme.text_color}; background: {theme.surface_color}; "
             f"selection-background-color: {theme.lead_color}; selection-color: {theme.button_text_color}; }}"
@@ -110,6 +110,13 @@ class SettingsDialog(DraggableDialog):
             parent.set_theme(theme)
         self.accept()
 
+    def _apply_font(self, font_name: str) -> None:
+        QApplication.setFont(QFont(font_name, QApplication.font().pointSize()))
+        parent = self.parent()
+        if parent is not None and hasattr(parent, "refresh_appearance"):
+            parent.refresh_appearance()
+        self.accept()
+
     def _create_close_button_layout(self) -> QHBoxLayout:
         button_layout = QHBoxLayout()
         close_button = QPushButton(CLOSE_DIALOG_BUTTON_TEXT)
@@ -117,7 +124,7 @@ class SettingsDialog(DraggableDialog):
         close_button.setCursor(Qt.PointingHandCursor)
         close_button.setStyleSheet(
             f"QPushButton {{ background-color: {self.theme.lead_color}; color: {self.theme.button_text_color}; "
-            "padding: 6px 16px; border: 1px solid transparent; border-radius: 5px; font-family: 'Segoe UI'; font-size: 10pt; }"
+            "padding: 6px 16px; border: 1px solid transparent; border-radius: 5px; font-size: 10pt; }"
             f"QPushButton:hover, QPushButton:focus {{ border-color: {self.theme.text_color}; }}"
         )
         close_button.clicked.connect(self.accept)

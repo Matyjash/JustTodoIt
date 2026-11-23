@@ -13,7 +13,6 @@ class Theme:
     neutral_color: str = "#9e9e9e"
     border_color: str = "#EBEAEA"
 
-    title_font_name: str = "Arial"
     title_font_size: int = 14
 
     input_padding: str = "8px"
@@ -22,7 +21,6 @@ class Theme:
     add_btn_padding: str = "8px 15px"
 
     list_border_radius: str = "4px"
-    list_item_font_name: str = "Arial"
     list_item_font_size: int = 10
 
     task_row_button_size: int = 20

@@ -299,9 +299,9 @@ class MainWindow(ResizableWindow):
     def _add_task_to_list(self, task: Task) -> None:
         item = QListWidgetItem()
         item.setData(Qt.UserRole, task)
-        item.setFont(
-            QFont(self.theme.list_item_font_name, self.theme.list_item_font_size)
-        )
+        font = QFont()
+        font.setPointSize(self.theme.list_item_font_size)
+        item.setFont(font)
         item.setFlags(item.flags() | Qt.ItemIsDragEnabled)
         self.todo_list.addItem(item)
 
@@ -473,6 +473,9 @@ class MainWindow(ResizableWindow):
     def set_theme(self, theme: Theme) -> None:
         """Reloads the window using the selected theme."""
         self.theme = theme
+        self.refresh_appearance()
+
+    def refresh_appearance(self) -> None:
         self.init_ui(restore_geometry=False, initialize_window=False)
 
     def _move_task_in_list(self, from_row: int, to_row: int) -> None:

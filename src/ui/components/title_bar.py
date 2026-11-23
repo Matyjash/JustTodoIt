@@ -43,7 +43,10 @@ class TitleBar(QWidget):
             layout.addWidget(logo)
         label = QPushButton(title)
         if theme:
-            label.setFont(QFont(theme.title_font_name, theme.title_font_size, QFont.Bold))
+            font = QFont()
+            font.setPointSize(theme.title_font_size)
+            font.setBold(True)
+            label.setFont(font)
             label.setStyleSheet(
                 f"QPushButton {{ background-color: transparent; color: {self.theme.button_text_color}; "
                 f"border: none; padding: {TITLE_PADDING}px; text-align: left; }}"

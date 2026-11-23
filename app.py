@@ -1,5 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication
+from PyQt5.QtGui import QFont
+from src.settings.font import FontSettings
 from src.settings.theme import ThemeSettings
 from src.task_file_storage import TaskFileStorage
 from src.task_manager import TaskManager
@@ -24,6 +26,7 @@ def main():
             if not instance_lock.acquire():
                 return 0
             task_file_storage = TaskFileStorage()
+            app.setFont(QFont(FontSettings.load_selected_font(), app.font().pointSize()))
             window = MainWindow(
                 task_manager=TaskManager(task_file_storage, DailyTaskReset(DailySettings.reset_time)),
                 theme=ThemeSettings.load_selected_theme(),
