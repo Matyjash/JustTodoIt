@@ -3,7 +3,7 @@ from src.settings.settings_storage import SettingsStorage
 
 FONT_SETTING_KEY = "font"
 DEFAULT_FONT_NAME = "Arial"
-FONT_NAMES = (DEFAULT_FONT_NAME, "Segoe UI")
+FONT_NAMES = (DEFAULT_FONT_NAME, "Segoe UI", "Calibri", "Georgia", "Comic Sans MS")
 
 
 class FontSettings:
