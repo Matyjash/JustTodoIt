@@ -22,6 +22,8 @@ CAPTURE_DEVICE_PIXEL_RATIO = 1
 
 PREVIEW_TASK_TEXT = "develop this app"
 PREVIEW_DAILY_TASK_TEXT = "change underwear"
+PREVIEW_URI_TASK_TEXT = "check github trending repositories"
+PREVIEW_TASK_URI = "https://github.com/trending"
 PREVIEW_THEME_NAME = TIGER_THEME_NAME
 
 WINDOW_SETTINGS_FILENAME = "window.ini"
@@ -40,6 +42,9 @@ def capture(app, add_task=False, add_daily_task=False):
     if add_daily_task:
         task = window.task_manager.add(PREVIEW_DAILY_TASK_TEXT)
         window.task_manager.set_daily(task, True)
+        uri_task = window.task_manager.add(PREVIEW_URI_TASK_TEXT)
+        window.task_manager.set_daily(uri_task, True)
+        window.task_manager.set_uri(uri_task, PREVIEW_TASK_URI)
         window._render_tasks()
     window.input_field.clearFocus()
     QTest.qWait(CAPTURE_DELAY_MS)
