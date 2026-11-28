@@ -12,12 +12,14 @@ from PyQt5.QtWidgets import (
     QAbstractItemView,
     QApplication,
     QLabel,
+    QMessageBox,
 )
-from PyQt5.QtCore import Qt, QEvent, QSize, QTimer
-from PyQt5.QtGui import QFont
+from PyQt5.QtCore import Qt, QEvent, QSize, QTimer, QUrl
+from PyQt5.QtGui import QFont, QDesktopServices
 from src.settings.daily import DailySettings
 from src.settings.settings_storage import SettingsStorage
 from src.task import Task
+from src.task_uri import validate_uri
 from src.task_manager import TaskManager
 from src.ui.theme.theme import DEFAULT_THEME, Theme
 from src.ui.edit_task_window import EditTaskDialog
@@ -328,6 +330,15 @@ class MainWindow(ResizableWindow):
         item_widget.add_drag_source(task_label)
         item_layout.addWidget(task_label)
 
+        if task.uri:
+            uri_button = self._create_task_row_button(self.theme.neutral_color)
+            uri_button.setIcon(create_icon("open-link", self.theme.button_text_color))
+            uri_button.setToolTip(f"Open URI: {task.uri}")
+            uri_button.setAccessibleName("Open task URI")
+            uri_button.clicked.connect(lambda checked, task=task: self._open_task_uri(task))
+            item_widget.add_drag_source(uri_button)
+            item_layout.addWidget(uri_button)
+
         edit_button = self._create_task_row_button(self.theme.neutral_color)
         edit_button.setIcon(create_icon("edit", self.theme.button_text_color))
         edit_button.setToolTip("Edit task")
@@ -442,13 +453,30 @@ class MainWindow(ResizableWindow):
             main_geometry.height(),
         )
         edit_dialog = EditTaskDialog(task, self.theme, start_reference_position)
+        edit_dialog.uri_saved.connect(lambda uri: self.task_manager.set_uri(task, uri))
 
         result = edit_dialog.exec_()
 
         if result == QDialog.Accepted and edit_dialog.new_text:
             self.task_manager.rename(task, edit_dialog.new_text)
             self.task_manager.set_daily(task, edit_dialog.daily_checkbox.isChecked())
-            self._render_tasks()
+            if not edit_dialog.uri_checkbox.isChecked():
+                self.task_manager.set_uri(task, "")
+        self._render_tasks()
+
+    def _open_task_uri(self, task: Task) -> None:
+        try:
+            uri = validate_uri(task.uri)
+        except ValueError as error:
+            QMessageBox.warning(self, "Invalid URI", str(error))
+            return
+        if not QDesktopServices.openUrl(QUrl(uri, QUrl.StrictMode)):
+            QMessageBox.warning(
+                self,
+                "Could not open URI",
+                "The URI could not be opened. Check that a browser or an application "
+                "that handles this URI is installed and configured.",
+            )
 
     def delete_todo(self) -> None:
         """

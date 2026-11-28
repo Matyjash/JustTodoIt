@@ -15,6 +15,7 @@ class TaskFileStorage:
     KEY_COMPLETED_AT = "completed_at"
     KEY_ORDER = "order"
     KEY_DAILY = "daily"
+    KEY_URI = "uri"
 
     @staticmethod
     def get_file_path() -> str:
@@ -41,6 +42,8 @@ class TaskFileStorage:
                     if item.get(key) is not None and not isinstance(item[key], str):
                         raise ValueError(f"Task {key} must be a string or null")
                 order = item.get(TaskFileStorage.KEY_ORDER)
+                if not isinstance(item.get(TaskFileStorage.KEY_URI, ""), str):
+                    raise ValueError("Task URI must be a string")
                 tasks.append(Task(
                     text=item[TaskFileStorage.KEY_TEXT],
                     done=item[TaskFileStorage.KEY_DONE],
@@ -48,6 +51,7 @@ class TaskFileStorage:
                     completed_at=item.get(TaskFileStorage.KEY_COMPLETED_AT),
                     order=index if order is None else order,
                     daily=item.get(TaskFileStorage.KEY_DAILY, False),
+                    uri=item.get(TaskFileStorage.KEY_URI, ""),
                 ))
             return tasks
         except (TypeError, ValueError, OverflowError) as error:
@@ -65,6 +69,7 @@ class TaskFileStorage:
                 TaskFileStorage.KEY_COMPLETED_AT: task.completed_at,
                 TaskFileStorage.KEY_ORDER: task.order,
                 TaskFileStorage.KEY_DAILY: task.daily,
+                TaskFileStorage.KEY_URI: task.uri,
             }
             for task in tasks
         ]

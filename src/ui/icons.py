@@ -13,6 +13,10 @@ ICON_RASTER_SIZES = (16, 18, 20, 24, 32, 36, 40, 48, 64)
 _ICON_FILES = {
     "settings": "settings.svg",
     "edit": "edit.svg",
+    "open-link": "open-link.svg",
+    "save": "save.svg",
+    "check": "check.svg",
+    "cross": "cross.svg",
     "delete": "delete.svg",
     "logo": "logo.svg",
     "visibility": "visibility.svg",

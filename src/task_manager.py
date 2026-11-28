@@ -1,6 +1,7 @@
 from typing import Iterable, Protocol
 
 from src.task import Task
+from src.task_uri import validate_uri
 from src.daily_task_reset import DailyTaskReset
 
 
@@ -33,6 +34,19 @@ class TaskManager:
             return False
         task.daily = daily
         self._save()
+        return True
+
+    def set_uri(self, task: Task, uri: str) -> bool:
+        uri = validate_uri(uri) if uri else ""
+        if task not in self._tasks or task.uri == uri:
+            return False
+        previous_uri = task.uri
+        task.uri = uri
+        try:
+            self._save()
+        except Exception:
+            task.uri = previous_uri
+            raise
         return True
 
     def move_visible(self, task: Task, before: Task | None) -> bool:

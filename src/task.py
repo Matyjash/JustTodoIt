@@ -13,9 +13,11 @@ class Task:
         completed_at: Optional[str] = None,
         order: Optional[int] = None,
         daily: bool = False,
+        uri: str = "",
     ):
         self.text = text
         self.daily = daily
+        self.uri = uri
         self.done = done
         self.created_at = created_at if created_at else datetime.now().strftime(Task.TIME_FORMAT)
         self.completed_at = completed_at
