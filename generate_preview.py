@@ -19,6 +19,7 @@ from src.ui.theme.themes.tiger import TIGER_THEME_NAME
 CAPTURE_SIZE = QSize(309, 442)
 CAPTURE_DELAY_MS = 150
 CAPTURE_DEVICE_PIXEL_RATIO = 1
+PREVIEW_GAP_PX = 12
 
 PREVIEW_TASK_TEXT = "develop this app"
 PREVIEW_DAILY_TASK_TEXT = "change underwear"
@@ -71,11 +72,14 @@ def main():
 
     screenshots = (tiger, default)
     preview = QImage(
-        CAPTURE_SIZE.width() * len(screenshots), CAPTURE_SIZE.height(), QImage.Format_RGB32
+        CAPTURE_SIZE.width() * len(screenshots) + PREVIEW_GAP_PX * (len(screenshots) - 1),
+        CAPTURE_SIZE.height(),
+        QImage.Format_ARGB32,
     )
+    preview.fill(Qt.transparent)
     painter = QPainter(preview)
     for index, screenshot in enumerate(screenshots):
-        painter.drawImage(index * CAPTURE_SIZE.width(), 0, screenshot)
+        painter.drawImage(index * (CAPTURE_SIZE.width() + PREVIEW_GAP_PX), 0, screenshot)
     painter.end()
     if not preview.save(str(PREVIEW_PATH)):
         raise OSError(f"Could not save {PREVIEW_PATH}")
