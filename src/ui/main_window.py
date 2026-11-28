@@ -18,9 +18,9 @@ from PyQt5.QtCore import Qt, QEvent, QSize, QTimer, QUrl
 from PyQt5.QtGui import QFont, QDesktopServices
 from src.settings.daily import DailySettings
 from src.settings.settings_storage import SettingsStorage
-from src.task import Task
-from src.task_uri import validate_uri
-from src.task_manager import TaskManager
+from src.tasks.task import Task
+from src.tasks.task_uri import validate_uri
+from src.tasks.task_manager import TaskManager
 from src.ui.theme.theme import DEFAULT_THEME, Theme
 from src.ui.edit_task_window import EditTaskDialog
 from src.ui.settings.settings_dialog import SettingsDialog

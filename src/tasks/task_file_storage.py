@@ -1,6 +1,6 @@
 from typing import List
 from src.app_data import get_data_file_path
-from src.task import Task
+from src.tasks.task import Task
 from src.json_file import StorageError, read_json, write_json
 
 

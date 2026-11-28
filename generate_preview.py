@@ -9,8 +9,8 @@ from PyQt5.QtWidgets import QApplication
 
 from src.settings.settings_storage import SettingsStorage
 from src.settings.theme import ThemeSettings
-from src.task_file_storage import TaskFileStorage
-from src.task_manager import TaskManager
+from src.tasks.task_file_storage import TaskFileStorage
+from src.tasks.task_manager import TaskManager
 from src.ui.main_window import MainWindow
 from src.ui.theme.theme import DEFAULT_THEME_NAME
 from src.ui.theme.themes.tiger import TIGER_THEME_NAME

@@ -1,7 +1,7 @@
 from collections.abc import Callable, Iterable
 from datetime import datetime, time, timedelta
 
-from src.task import Task
+from src.tasks.task import Task
 
 
 class DailyTaskReset:

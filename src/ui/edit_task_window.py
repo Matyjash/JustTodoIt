@@ -11,8 +11,8 @@ from src.ui.components.title_bar import TitleBar
 from src.ui.components.checkbox import ThemedCheckBox
 from src.ui.components.window_drag import DraggableDialog
 from typing import Optional
-from src.task import Task
-from src.task_uri import validate_uri
+from src.tasks.task import Task
+from src.tasks.task_uri import validate_uri
 from src.ui.icons import create_icon
 from src.ui.theme.theme import DEFAULT_THEME, Theme
 

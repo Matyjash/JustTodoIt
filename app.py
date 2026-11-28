@@ -3,9 +3,9 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QFont
 from src.settings.font import FontSettings
 from src.settings.theme import ThemeSettings
-from src.task_file_storage import TaskFileStorage
-from src.task_manager import TaskManager
-from src.daily_task_reset import DailyTaskReset
+from src.tasks.task_file_storage import TaskFileStorage
+from src.tasks.task_manager import TaskManager
+from src.tasks.daily_task_reset import DailyTaskReset
 from src.settings.daily import DailySettings
 from src.json_file import StorageError
 from src.app_data import get_data_file_path

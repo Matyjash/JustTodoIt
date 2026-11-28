@@ -1,8 +1,8 @@
 from typing import Iterable, Protocol
 
-from src.task import Task
-from src.task_uri import validate_uri
-from src.daily_task_reset import DailyTaskReset
+from src.tasks.task import Task
+from src.tasks.task_uri import validate_uri
+from src.tasks.daily_task_reset import DailyTaskReset
 
 
 class TaskStorage(Protocol):
